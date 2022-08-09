@@ -1,67 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import Photos from 'googlephotos';
+import React, { useState } from 'react';
 
-export default () => {
-  const [accessToken, setAccessToken] = useState();
+import { getApp } from 'firebase/app';
+import { getAuth, signOut } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
-  useEffect(async () => {
-    const photos = new Photos(token);
-    const response = await photos.albums.list();
+import { Albums } from './Albums';
+import { Auth } from './Auth';
 
-    console.log(response);
-  }, [accessToken]);
+import { albumKey } from './util';
 
-  useEffect(() => {
-    const auth = getAuth();
+export const App = () => {
+  const auth = getAuth(getApp());
+  const [user] = useAuthState(auth);
 
-    auth.onAuthStateChanged((user) => {
-      console.log(user);
+  const [selectedAlbum, setSelectedAlbum] = useState(localStorage.getItem(albumKey));
 
-      if (user.refreshToken) {
-        user
-          .getIdToken(true)
-          .then(function (idToken) {
-            setAccessToken(idToken);
-          })
-          .catch(function (error) {
-            console.error(error);
-          });
-      } else {
-        const provider = new GoogleAuthProvider();
-        provider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly');
+  if (!user) return <Auth />;
+  else
+    return (
+      <div>
+        <div>Now we are logged in!</div>
+        <button onClick={() => signOut(auth)}>Sign Out</button>
 
-        signInWithPopup(auth, provider)
-          .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential.accessToken;
-            // The signed-in user info.
-            const user = result.user;
-            // ...
+        <pre>{JSON.stringify(user, undefined, 2)}</pre>
 
-            setAccessToken(user.accessToken);
-          })
-          .catch((error) => {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // The email of the user's account used.
-            const email = error.customData.email;
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            // ...
-
-            console.error(errorCode, errorMessage);
-          });
-      }
-    });
-  }, []);
-
-  return (
-    <>
-      <h1>Welcome to React Vite Micro App!</h1>
-      <p>Hard to get more minimal than this React app.</p>
-    </>
-  );
+        {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
+      </div>
+    );
 };
