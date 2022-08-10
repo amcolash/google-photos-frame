@@ -1,30 +1,45 @@
 import React, { useState } from 'react';
-
-import { getApp } from 'firebase/app';
-import { getAuth, signOut } from 'firebase/auth';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useEffect } from 'react';
+import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Albums } from './Albums';
-import { Auth } from './Auth';
-
-import { albumKey } from './util';
+import { Photos } from './Photos';
+import { selectedAlbumName, SERVER } from './util';
 
 export const App = () => {
-  const auth = getAuth(getApp());
-  const [user] = useAuthState(auth);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  const [selectedAlbum, setSelectedAlbum] = useState(localStorage.getItem(albumKey));
+  const selected = localStorage.getItem(selectedAlbumName);
+  const [selectedAlbum, setSelectedAlbum] = useState(selected ? JSON.parse(selected) : undefined);
 
-  if (!user) return <Auth />;
-  else
+  useEffect(() => {
+    fetch(`${SERVER}/status`)
+      .then((res) => res.json())
+      .then((data) => setLoggedIn(data.loggedIn));
+  }, []);
+
+  useEffect(() => {
+    if (selectedAlbum) localStorage.setItem(selectedAlbumName, JSON.stringify(selectedAlbum));
+    else localStorage.removeItem(selectedAlbumName);
+  }, [selectedAlbum, setSelectedAlbum]);
+
+  if (loggedIn)
     return (
-      <div>
-        <div>Now we are logged in!</div>
-        <button onClick={() => signOut(auth)}>Sign Out</button>
-
-        <pre>{JSON.stringify(user, undefined, 2)}</pre>
-
+      <div style={{ margin: '1em' }}>
+        <div style={{ textAlign: 'right' }}>
+          <button onClick={() => (location.href = `${SERVER}/oauth?logout=true`)}>Logout</button>
+        </div>
         {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
+        {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />}
       </div>
     );
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh' }}>
+      <div style={{ textAlign: 'center' }}>
+        <h2>Photo Frame</h2>
+        <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12em' }} />
+      </div>
+    </div>
+  );
 };
