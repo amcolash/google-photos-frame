@@ -101,9 +101,10 @@ async function authAndCache(url, opts, res) {
   }
 
   const access_token = (await oauth2Client.getAccessToken()).token;
+  const key = url + (opts ? JSON.stringify(opts) : '');
 
-  if (CACHE[url + opts ? JSON.stringify(opts) : '']) {
-    res.send(CACHE[url]);
+  if (CACHE[key]) {
+    res.send(CACHE[key]);
     return;
   }
 
@@ -114,7 +115,13 @@ async function authAndCache(url, opts, res) {
   });
   const json = await data.json();
 
-  CACHE[url] = json;
+  if (url.indexOf('mediaItems:search') !== -1) {
+    json.mediaItems.forEach((m, i) => {
+      json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id };
+    });
+  }
+
+  CACHE[key] = json;
   res.send(json);
 }
 
