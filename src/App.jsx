@@ -4,7 +4,6 @@ import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Albums } from './Albums';
 import { Photos } from './Photos';
-import { Slideshow } from './Slideshow';
 import { selectedAlbumName, SERVER } from './util';
 
 export const App = () => {
@@ -12,7 +11,6 @@ export const App = () => {
 
   const [loggedIn, setLoggedIn] = useState(undefined);
   const [selectedAlbum, setSelectedAlbum] = useState(selected ? JSON.parse(selected) : undefined);
-  const [slideshow, setSlideshow] = useState(false);
 
   useEffect(() => {
     fetch(`${SERVER}/status`)
@@ -28,14 +26,18 @@ export const App = () => {
   if (loggedIn)
     return (
       <div style={{ margin: '1em' }}>
-        <button onClick={() => (location.href = `${SERVER}/oauth?logout=true`)} style={{ position: 'absolute', top: '1em', right: '1em' }}>
-          Logout
-        </button>
-        {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
-        {selectedAlbum && !slideshow && (
-          <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} setSlideshow={setSlideshow} />
+        {!selectedAlbum && (
+          <div>
+            <button
+              onClick={() => (location.href = `${SERVER}/oauth?logout=true`)}
+              style={{ position: 'absolute', top: '1em', right: '1em' }}
+            >
+              Logout
+            </button>
+            <Albums setSelectedAlbum={setSelectedAlbum} />
+          </div>
         )}
-        {selectedAlbum && slideshow && <Slideshow setSlideshow={setSlideshow} />}
+        {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />}
       </div>
     );
 

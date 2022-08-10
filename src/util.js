@@ -7,4 +7,4 @@ export const selectedAlbumName = `${prefix}-album`;
 
 export const themeColor = '#5e9626';
 
-export const placeholder = true;
+export const placeholder = false;
