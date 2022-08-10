@@ -12,7 +12,7 @@ export function Albums(props) {
 
   return (
     <div>
-      <h3>Albums</h3>
+      <h2>Albums</h2>
       <div
         style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 12em)', placeContent: 'flex-start space-between', gap: '1.5em' }}
       >

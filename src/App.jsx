@@ -4,13 +4,15 @@ import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Albums } from './Albums';
 import { Photos } from './Photos';
+import { Slideshow } from './Slideshow';
 import { selectedAlbumName, SERVER } from './util';
 
 export const App = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
-
   const selected = localStorage.getItem(selectedAlbumName);
+
+  const [loggedIn, setLoggedIn] = useState(undefined);
   const [selectedAlbum, setSelectedAlbum] = useState(selected ? JSON.parse(selected) : undefined);
+  const [slideshow, setSlideshow] = useState(false);
 
   useEffect(() => {
     fetch(`${SERVER}/status`)
@@ -30,7 +32,10 @@ export const App = () => {
           Logout
         </button>
         {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
-        {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />}
+        {selectedAlbum && !slideshow && (
+          <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} setSlideshow={setSlideshow} />
+        )}
+        {selectedAlbum && slideshow && <Slideshow setSlideshow={setSlideshow} />}
       </div>
     );
 
@@ -38,7 +43,8 @@ export const App = () => {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh' }}>
       <div style={{ textAlign: 'center' }}>
         <h2>Photo Frame</h2>
-        <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12em' }} />
+        {loggedIn === false && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12em' }} />}
+        {loggedIn === undefined && <h3>Loading...</h3>}
       </div>
     </div>
   );

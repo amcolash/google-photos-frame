@@ -48,10 +48,13 @@ export function Photos(props) {
           style={{ margin: '1em', marginLeft: 0 }}
         />
         <div>
-          <h3>
+          <h2>
             {album.mediaItemsCount} photos in "{album.title}"
-          </h3>
-          <button onClick={() => props.setSelectedAlbum()}>Back</button>
+          </h2>
+          <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
+            Back
+          </button>
+          <button onClick={() => props.setSlideshow(true)}>Slideshow</button>
         </div>
       </div>
 
@@ -65,7 +68,7 @@ export function Photos(props) {
         }}
       >
         {items.map((i) => (
-          <a href={`${i.baseUrl}=s1500`} target="_blank">
+          <a href={`${i.baseUrl}=s1500`} target="_blank" key={i.id}>
             <LazyLoadImage src={placeholder ? 'https://via.placeholder.com/64' : `${i.baseUrl}=s64-c`} threshold={1000} />
           </a>
         ))}
