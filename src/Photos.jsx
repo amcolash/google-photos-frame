@@ -1,53 +1,88 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-import { SERVER } from './util';
+import { placeholder, SERVER, themeColor } from './util';
 
 export function Photos(props) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const album = props.selectedAlbum;
 
-  useEffect(async () => {
+  const [items, setItems] = useState([]);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
     let loadMore = true;
-    let page = undefined;
 
-    let allItems = [];
-    while (loadMore) {
-      const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
-      const data = await res.json();
+    setTimeout(async () => {
+      setProgress(Math.min(0.1, 100 / album.mediaItemsCount));
 
-      page = data.nextPageToken;
-      if (!page) loadMore = false;
-      allItems = [...allItems, ...data.mediaItems];
+      let page = undefined;
+      let allItems = [];
+      let index = 1;
+      while (loadMore) {
+        const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
+        const data = await res.json();
 
-      setItems(allItems);
-    }
+        page = data.nextPageToken;
+        if (!page) loadMore = false;
+        allItems = [...allItems, ...data.mediaItems];
 
-    setLoading(false);
+        setItems(allItems);
+        setProgress((index * 100) / album.mediaItemsCount);
+
+        index++;
+      }
+
+      setProgress(1);
+    });
+
+    return () => {
+      loadMore = false;
+    };
   }, []);
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img src={`${album.coverPhotoBaseUrl}=w128-h128-c`} style={{ margin: '1em', marginLeft: 0 }} />
+        <img
+          src={placeholder ? 'https://via.placeholder.com/128' : `${album.coverPhotoBaseUrl}=w128-h128-c`}
+          style={{ margin: '1em', marginLeft: 0 }}
+        />
         <div>
           <h3>
             {album.mediaItemsCount} photos in "{album.title}"
           </h3>
-          <button onClick={() => props.setSelectedAlbum()}>Clear</button>
+          <button onClick={() => props.setSelectedAlbum()}>Back</button>
         </div>
       </div>
 
       <div
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 4em)', placeContent: 'flex-start space-between', gap: '0.5em' }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, 4em)',
+          placeContent: 'flex-start space-between',
+          gap: '0.5em',
+          marginTop: '2em',
+        }}
       >
         {items.map((i) => (
-          <a href={`${i.baseUrl}=s1500`} target="_blank" key={i.id}>
-            <img src={`${i.baseUrl}=w64-h64-c`} />
+          <a href={`${i.baseUrl}=s1500`} target="_blank">
+            <LazyLoadImage src={placeholder ? 'https://via.placeholder.com/64' : `${i.baseUrl}=s64-c`} threshold={1000} />
           </a>
         ))}
       </div>
+
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: `calc(100% * ${progress})`,
+          height: '0.25em',
+          backgroundColor: themeColor,
+          transition: 'width 1s, opacity 1s 1.5s',
+          opacity: progress < 1 ? '1' : '0',
+        }}
+      />
     </div>
   );
 }

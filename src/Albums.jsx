@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SERVER } from './util';
+import { placeholder, SERVER } from './util';
 
 export function Albums(props) {
   const [albums, setAlbums] = useState([]);
@@ -14,13 +14,13 @@ export function Albums(props) {
     <div>
       <h3>Albums</h3>
       <div
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 12em)', placeContent: 'flex-start space-between', gap: '1em' }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 12em)', placeContent: 'flex-start space-between', gap: '1.5em' }}
       >
         {albums
           .sort((a, b) => a.title.localeCompare(b.title))
           .map((a) => (
             <div key={a.id} onClick={() => props.setSelectedAlbum(a)} style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={`${a.coverPhotoBaseUrl}=w96-h96-c`} style={{ margin: '0.5em' }} />
+              <img src={placeholder ? 'https://via.placeholder.com/96' : `${a.coverPhotoBaseUrl}=s96-c`} style={{ marginRight: '0.5em' }} />
               <div>{a.title}</div>
             </div>
           ))}

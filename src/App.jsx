@@ -26,9 +26,9 @@ export const App = () => {
   if (loggedIn)
     return (
       <div style={{ margin: '1em' }}>
-        <div style={{ textAlign: 'right' }}>
-          <button onClick={() => (location.href = `${SERVER}/oauth?logout=true`)}>Logout</button>
-        </div>
+        <button onClick={() => (location.href = `${SERVER}/oauth?logout=true`)} style={{ position: 'absolute', top: '1em', right: '1em' }}>
+          Logout
+        </button>
         {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
         {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />}
       </div>

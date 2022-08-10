@@ -4,3 +4,7 @@ export const SERVER = `${HOST}:${PORT}`;
 
 const prefix = 'photo-frame';
 export const selectedAlbumName = `${prefix}-album`;
+
+export const themeColor = '#5e9626';
+
+export const placeholder = true;
