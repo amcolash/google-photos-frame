@@ -1,36 +1,36 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { placeholder } from './util';
+import React, { useEffect, useState } from 'react';
+import { placeholder, shuffle } from './util';
 
 let overlayTimer;
 let shuffleTimer;
 
 export function Slideshow(props) {
   const [overlay, setOverlay] = useState(true);
-  const [current, setCurrent] = useState({});
   const [duration, setDuration] = useState(1000 * 5);
 
-  const shuffle = useCallback(() => {
-    const items = props.items;
-    const random = items[Math.floor(Math.random() * items.length)];
-    setCurrent(random);
+  const [current, setCurrent] = useState(0);
+  const [shuffledList, setShuffledList] = useState([]);
 
-    shuffleTimer = setTimeout(shuffle, duration);
-  }, [props.items, setCurrent]);
-
-  useEffect(shuffle, []);
+  useEffect(() => {
+    const shuffled = [...props.items];
+    shuffle(shuffled);
+    setShuffledList(shuffled);
+  }, []);
 
   useEffect(() => {
     clearTimeout(shuffleTimer);
-    shuffleTimer = setTimeout(shuffle, duration);
-  }, [shuffle, duration]);
+    shuffleTimer = setTimeout(() => setCurrent((current + 1) % shuffledList.length), duration);
+  }, [current, duration, setCurrent, shuffledList]);
 
   useEffect(() => {
     clearTimeout(overlayTimer);
     overlayTimer = setTimeout(() => setOverlay(false), 5000);
   }, [setOverlay]);
 
+  const photo = shuffledList[current] || {};
+
   return (
-    <div onClick={() => setOverlay(true)}>
+    <div onClick={() => setOverlay(true)} style={{ cursor: overlay ? undefined : 'none' }}>
       <div
         style={{
           position: 'absolute',
@@ -48,7 +48,7 @@ export function Slideshow(props) {
       </div>
 
       <img
-        src={placeholder ? `https://via.placeholder.com/1200?text=${current.id}` : `${current.baseUrl}=s1200-c`}
+        src={placeholder ? `https://via.placeholder.com/1200?text=${photo.id}` : `${photo.baseUrl}=s1200-c`}
         style={{
           width: '100vw',
           height: '100vh',

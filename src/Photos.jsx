@@ -74,7 +74,7 @@ function PhotoList(props) {
           style={{ margin: '1em', marginLeft: 0 }}
         />
         <div>
-          <h2>
+          <h2 style={{ marginTop: 0 }}>
             {props.album.mediaItemsCount} photos in "{props.album.title}"
           </h2>
           <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
