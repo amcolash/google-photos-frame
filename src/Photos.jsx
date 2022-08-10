@@ -57,7 +57,9 @@ export function Photos(props) {
         }}
       />
 
-      {!slideshow && <PhotoList album={album} items={items} setSelectedAlbum={props.setSelectedAlbum} setSlideshow={setSlideshow} />}
+      {!slideshow && (
+        <PhotoList album={album} items={items} progress={progress} setSelectedAlbum={props.setSelectedAlbum} setSlideshow={setSlideshow} />
+      )}
       {slideshow && <Slideshow items={items} setSlideshow={setSlideshow} />}
     </div>
   );
@@ -78,7 +80,9 @@ function PhotoList(props) {
           <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
             Back
           </button>
-          <button onClick={() => props.setSlideshow(true)}>Slideshow</button>
+          <button onClick={() => props.setSlideshow(true)} disabled={props.progress < 1}>
+            Slideshow
+          </button>
         </div>
       </div>
 
