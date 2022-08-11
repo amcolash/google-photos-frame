@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { placeholder, shuffle } from './util';
+import { placeholder, SERVER, shuffle } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -48,7 +48,7 @@ export function Slideshow(props) {
       </div>
 
       <img
-        src={placeholder ? `https://via.placeholder.com/1200?text=${photo.id}` : `${photo.baseUrl}=s1200-c`}
+        src={placeholder ? `${SERVER}/image?size=1200&id=${photo.id}` : `${photo.baseUrl}=s1200-c`}
         style={{
           width: '100vw',
           height: '100vh',

@@ -20,7 +20,10 @@ export function Albums(props) {
           .sort((a, b) => a.title.localeCompare(b.title))
           .map((a) => (
             <div key={a.id} onClick={() => props.setSelectedAlbum(a)} style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={placeholder ? 'https://via.placeholder.com/96' : `${a.coverPhotoBaseUrl}=s96-c`} style={{ marginRight: '0.5em' }} />
+              <img
+                src={placeholder ? `${SERVER}/image?size=96&id=${a.id}` : `${a.coverPhotoBaseUrl}=s96-c`}
+                style={{ marginRight: '0.5em' }}
+              />
               <div>{a.title}</div>
             </div>
           ))}

@@ -70,7 +70,7 @@ function PhotoList(props) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <img
-          src={placeholder ? 'https://via.placeholder.com/128' : `${props.album.coverPhotoBaseUrl}=s128-c`}
+          src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${props.album.coverPhotoBaseUrl}=s128-c`}
           style={{ margin: '1em', marginLeft: 0 }}
         />
         <div>
@@ -96,8 +96,8 @@ function PhotoList(props) {
         }}
       >
         {props.items.map((i) => (
-          <a href={`${i.baseUrl}=s1500`} target="_blank" key={i.id}>
-            <LazyLoadImage src={placeholder ? 'https://via.placeholder.com/64' : `${i.baseUrl}=s64-c`} threshold={1000} />
+          <a href={placeholder ? `${SERVER}/image?size=1500&id=${i.id}` : `${i.baseUrl}=s1500`} target="_blank" key={i.id}>
+            <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />
           </a>
         ))}
       </div>

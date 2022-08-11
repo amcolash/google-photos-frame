@@ -7,7 +7,7 @@ export const selectedAlbumName = `${prefix}-album`;
 
 export const themeColor = '#5e9626';
 
-export const placeholder = false;
+export const placeholder = true;
 
 // From https://stackoverflow.com/a/2450976/2303432
 export function shuffle(array) {

@@ -15,7 +15,11 @@ export const App = () => {
   useEffect(() => {
     fetch(`${SERVER}/status`)
       .then((res) => res.json())
-      .then((data) => setLoggedIn(data.loggedIn));
+      .then((data) => setLoggedIn(data.loggedIn))
+      .catch((err) => {
+        console.error(err);
+        setTimeout(() => location.reload(), 10000);
+      });
   }, []);
 
   useEffect(() => {
