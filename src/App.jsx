@@ -33,7 +33,10 @@ export const App = () => {
         {!selectedAlbum && (
           <div>
             <button
-              onClick={() => (location.href = `${SERVER}/oauth?logout=true`)}
+              onClick={() => {
+                localStorage.removeItem(selectedAlbumName);
+                location.href = `${SERVER}/oauth?logout=true&redirect=${location.href}`;
+              }}
               style={{ position: 'absolute', top: '1em', right: '1em' }}
             >
               Logout

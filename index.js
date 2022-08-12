@@ -63,7 +63,7 @@ app.get('/oauth', async (req, res) => {
     nconf.set('refresh_token', undefined);
     nconf.save();
 
-    res.redirect(clientUrl);
+    res.redirect(req.query.redirect);
 
     CACHE = {};
   } else {

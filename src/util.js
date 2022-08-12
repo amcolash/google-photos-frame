@@ -1,9 +1,10 @@
-const HOST = 'http://localhost';
+const HOST = import.meta.env.PROD ? 'http://192.168.1.101' : 'http://localhost';
 const PORT = 3001;
 export const SERVER = `${HOST}:${PORT}`;
 
 const prefix = 'photo-frame';
 export const selectedAlbumName = `${prefix}-album`;
+export const durationName = `${prefix}-duration`;
 
 export const themeColor = '#5e9626';
 

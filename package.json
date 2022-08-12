@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "server": "nodemon --ignore token.json"
+    "server": "nodemon --ignore token.json --ignore src/"
   },
   "dependencies": {
     "cors": "^2.8.5",
