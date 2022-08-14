@@ -30,6 +30,12 @@
       button:hover:not(:disabled) {
         background: #ddd;
       }
+
+      @supports not (display: grid) {
+        .albums > .album {
+          margin: 1em 0;
+        }
+      }
     </style>
   </head>
   <body>

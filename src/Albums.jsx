@@ -14,12 +14,13 @@ export function Albums(props) {
     <div>
       <h2>Albums</h2>
       <div
+        className="albums"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 12em)', placeContent: 'flex-start space-between', gap: '1.5em' }}
       >
         {albums
           .sort((a, b) => a.title.localeCompare(b.title))
           .map((a) => (
-            <div key={a.id} onClick={() => props.setSelectedAlbum(a)} style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="album" key={a.id} onClick={() => props.setSelectedAlbum(a)} style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={placeholder ? `${SERVER}/image?size=96&id=${a.id}` : `${a.coverPhotoBaseUrl}=s96-c`}
                 style={{ marginRight: '0.5em' }}
