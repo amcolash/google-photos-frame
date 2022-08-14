@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Slideshow } from './Slideshow';
 
-import { placeholder, SERVER, shuffle, themeColor } from './util';
+import { placeholder, SERVER, shuffle, slideshowName, themeColor } from './util';
 
 export function Photos(props) {
   const album = props.selectedAlbum;
@@ -37,7 +37,10 @@ export function Photos(props) {
       }
 
       setProgress(1);
-      if (location.hash === '#slideshow') setSlideshowItems(shuffle([...allItems]));
+
+      if (localStorage.getItem(slideshowName)) {
+        setSlideshowItems(shuffle([...allItems]));
+      }
     });
 
     return () => {
@@ -93,7 +96,7 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]);
               props.setSlideshowItems(shuffledItems);
-              location.hash = 'slideshow';
+              localStorage.setItem(slideshowName, true);
             }}
             disabled={props.progress < 1}
           >
@@ -118,7 +121,7 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
               props.setSlideshowItems([i, ...shuffledItems]);
-              location.hash = 'slideshow';
+              localStorage.setItem(slideshowName, true);
             }}
           >
             <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { durationName, placeholder, SERVER, shuffle } from './util';
+import { durationName, placeholder, SERVER, slideshowName } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -49,7 +49,7 @@ export function Slideshow(props) {
         <button
           onClick={() => {
             props.setSlideshowItems();
-            location.hash = '';
+            localStorage.removeItem(slideshowName);
           }}
         >
           Back
