@@ -11,9 +11,9 @@ nconf.load();
 
 let REFRESH_TOKEN = nconf.get('refresh_token');
 
-const clientUrl = 'http://localhost:5173';
-const mockResponse = true;
-const port = process.env.PORT || 3001;
+const clientUrl = 'http://192.168.1.146:5173';
+const mockResponse = false;
+const port = process.env.PORT || 3500;
 let CACHE = {};
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
@@ -40,9 +40,11 @@ if (!mockResponse && (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URL)) process.ex
 
 app.use(cors());
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+app.use('/', express.static('dist'));
 
 app.get('/oauth', async (req, res) => {
   // If the callback passed a code

@@ -1,6 +1,5 @@
-const HOST = import.meta.env.PROD ? 'http://192.168.1.101' : 'http://localhost';
-const PORT = 3001;
-export const SERVER = `${HOST}:${PORT}`;
+const PORT = 3500;
+export const SERVER = import.meta.env.PROD ? 'https://home.amcolash.com:9090/frame/' : `http://192.168.1.146:${PORT}`;
 
 const prefix = 'photo-frame';
 export const selectedAlbumName = `${prefix}-album`;
@@ -8,7 +7,7 @@ export const durationName = `${prefix}-duration`;
 
 export const themeColor = '#5e9626';
 
-export const placeholder = true;
+export const placeholder = false;
 
 // From https://stackoverflow.com/a/2450976/2303432
 export function shuffle(array) {

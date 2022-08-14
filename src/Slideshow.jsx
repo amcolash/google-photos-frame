@@ -11,27 +11,20 @@ export function Slideshow(props) {
   const [duration, setDuration] = useState(!isNaN(parsedDuration) ? parsedDuration : 5);
 
   const [current, setCurrent] = useState(0);
-  const [shuffledList, setShuffledList] = useState([]);
-
-  useEffect(() => {
-    const shuffled = [...props.items];
-    shuffle(shuffled);
-    setShuffledList(shuffled);
-  }, []);
 
   useEffect(() => {
     clearTimeout(shuffleTimer);
-    shuffleTimer = setTimeout(() => setCurrent((current + 1) % shuffledList.length), duration * 1000);
+    shuffleTimer = setTimeout(() => setCurrent((current + 1) % props.items.length), duration * 1000);
 
     localStorage.setItem(durationName, duration);
-  }, [current, duration, setCurrent, shuffledList]);
+  }, [current, duration, setCurrent, props.items]);
 
   useEffect(() => {
     clearTimeout(overlayTimer);
     overlayTimer = setTimeout(() => setOverlay(false), 5000);
   }, [duration, overlay, setOverlay]);
 
-  const photo = shuffledList[current] || {};
+  const photo = props.items[current] || {};
 
   const min = Math.floor(duration / 60);
   const sec = Math.floor(duration - min * 60)
@@ -53,7 +46,14 @@ export function Slideshow(props) {
           padding: '1em',
         }}
       >
-        <button onClick={() => props.setSlideshow(false)}>Back</button>
+        <button
+          onClick={() => {
+            props.setSlideshowItems();
+            location.hash = '';
+          }}
+        >
+          Back
+        </button>
         <div style={{ marginTop: '1em' }}>
           <input type="range" value={duration} min={5} max={5 * 60} onChange={(e) => setDuration(e.target.value)} />
           <div>

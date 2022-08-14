@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Slideshow } from './Slideshow';
 
-import { placeholder, SERVER, themeColor } from './util';
+import { placeholder, SERVER, shuffle, themeColor } from './util';
 
 export function Photos(props) {
   const album = props.selectedAlbum;
 
   const [items, setItems] = useState([]);
   const [progress, setProgress] = useState(0);
-  const [slideshow, setSlideshow] = useState(false);
+  const [slideshowItems, setSlideshowItems] = useState();
 
   useEffect(() => {
     let loadMore = true;
@@ -35,6 +35,7 @@ export function Photos(props) {
       }
 
       setProgress(1);
+      if (location.hash === '#slideshow') setSlideshowItems(shuffle([...allItems]));
     });
 
     return () => {
@@ -57,10 +58,16 @@ export function Photos(props) {
         }}
       />
 
-      {!slideshow && (
-        <PhotoList album={album} items={items} progress={progress} setSelectedAlbum={props.setSelectedAlbum} setSlideshow={setSlideshow} />
+      {!slideshowItems && (
+        <PhotoList
+          album={album}
+          items={items}
+          progress={progress}
+          setSelectedAlbum={props.setSelectedAlbum}
+          setSlideshowItems={setSlideshowItems}
+        />
       )}
-      {slideshow && <Slideshow items={items} setSlideshow={setSlideshow} />}
+      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} />}
     </div>
   );
 }
@@ -80,7 +87,14 @@ function PhotoList(props) {
           <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
             Back
           </button>
-          <button onClick={() => props.setSlideshow(true)} disabled={props.progress < 1}>
+          <button
+            onClick={() => {
+              const shuffledItems = shuffle([...props.items]);
+              props.setSlideshowItems(shuffledItems);
+              location.hash = 'slideshow';
+            }}
+            disabled={props.progress < 1}
+          >
             Slideshow
           </button>
         </div>
@@ -96,9 +110,17 @@ function PhotoList(props) {
         }}
       >
         {props.items.map((i) => (
-          <a href={placeholder ? `${SERVER}/image?size=1500&id=${i.id}` : `${i.baseUrl}=s1500`} target="_blank" key={i.id}>
+          <button
+            key={i.id}
+            style={{ padding: 0, border: 'none', background: 'none' }}
+            onClick={() => {
+              const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
+              props.setSlideshowItems([i, ...shuffledItems]);
+              location.hash = 'slideshow';
+            }}
+          >
             <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />
-          </a>
+          </button>
         ))}
       </div>
     </div>
