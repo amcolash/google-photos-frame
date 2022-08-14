@@ -4,7 +4,6 @@ export const SERVER = import.meta.env.PROD ? 'https://home.amcolash.com:9090/fra
 const prefix = 'photo-frame';
 export const selectedAlbumName = `${prefix}-album`;
 export const durationName = `${prefix}-duration`;
-export const slideshowName = `${prefix}-slideshow`;
 
 export const themeColor = '#5e9626';
 

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { Slideshow } from './Slideshow';
+import NoSleep from 'nosleep.js';
 
-import { placeholder, SERVER, shuffle, slideshowName, themeColor } from './util';
+import { Slideshow } from './Slideshow';
+import { placeholder, SERVER, shuffle, themeColor } from './util';
+
+const noSleep = new NoSleep();
 
 export function Photos(props) {
   const album = props.selectedAlbum;
@@ -40,19 +43,20 @@ export function Photos(props) {
       }
 
       setProgress(1);
-
-      if (localStorage.getItem(slideshowName)) {
-        setSlideshowItems(shuffle([...allItems]));
-      }
     });
 
-    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 15 * 60 * 1000);
+    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 30 * 60 * 1000);
 
     return () => {
       if (timer) clearTimeout(timer);
       loadMore = false;
     };
   }, [refreshCounter, setRefreshCounter]);
+
+  useEffect(() => {
+    if (slideshowItems) noSleep.enable();
+    else noSleep.disable();
+  }, [slideshowItems]);
 
   return (
     <div>
@@ -102,7 +106,6 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]);
               props.setSlideshowItems(shuffledItems);
-              localStorage.setItem(slideshowName, true);
             }}
             disabled={props.progress < 1}
           >
@@ -127,7 +130,6 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
               props.setSlideshowItems([i, ...shuffledItems]);
-              localStorage.setItem(slideshowName, true);
             }}
           >
             <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />

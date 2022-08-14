@@ -148,21 +148,26 @@ async function authAndCache(url, opts, res, skipCache) {
     return;
   }
 
-  const data = await fetch(url, {
-    method: opts ? 'POST' : 'GET',
-    headers: { Authorization: `Bearer ${access_token}` },
-    body: opts ? JSON.stringify(opts) : undefined,
-  });
-  const json = await data.json();
-
-  if (url.indexOf('mediaItems:search') !== -1) {
-    json.mediaItems.forEach((m, i) => {
-      json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id, mimeType: m.mimeType };
+  try {
+    const data = await fetch(url, {
+      method: opts ? 'POST' : 'GET',
+      headers: { Authorization: `Bearer ${access_token}` },
+      body: opts ? JSON.stringify(opts) : undefined,
     });
-  }
+    const json = await data.json();
 
-  CACHE[key] = json;
-  res.send(json);
+    if (url.indexOf('mediaItems:search') !== -1) {
+      json.mediaItems.forEach((m, i) => {
+        json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id, mimeType: m.mimeType };
+      });
+    }
+
+    CACHE[key] = json;
+    res.send(json);
+  } catch (err) {
+    console.error(err);
+    res.send(500);
+  }
 }
 
 // Seeded rng: https://stackoverflow.com/a/47593316/2303432
