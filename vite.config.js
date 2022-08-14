@@ -1,9 +1,10 @@
 import legacy from '@vitejs/plugin-legacy';
 
 export default {
+  base: '/frame/',
   build: {
     target: 'es2015',
-    sourcemap: 'inline',
+    sourcemap: true,
   },
   plugins: [
     legacy({
