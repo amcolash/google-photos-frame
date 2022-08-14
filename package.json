@@ -11,7 +11,6 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
-    "eruda": "^2.5.0",
     "express": "^4.18.1",
     "googleapis": "^105.0.0",
     "nconf": "^0.12.0",
@@ -19,13 +18,17 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-lazy-load-image-component": "^1.5.5",
-    "react-social-login-buttons": "^3.6.1"
+    "react-social-login-buttons": "^3.6.1",
+    "vite-plugin-legacy": "^2.1.0",
+    "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^2.0.1",
     "babel-preset-nano-react-app": "^0.1.0",
-    "terser": "^5.14.2",
     "vite": "^3.0.4"
+  },
+  "overrides": {
+    "systemjs": "6.11.0"
   },
   "babel": {
     "presets": [

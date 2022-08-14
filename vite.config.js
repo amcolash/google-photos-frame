@@ -1,9 +1,13 @@
 import legacy from '@vitejs/plugin-legacy';
 
 export default {
+  build: {
+    target: 'es2015',
+    sourcemap: 'inline',
+  },
   plugins: [
     legacy({
-      targets: ['defaults', 'not IE 11', 'iOS 9'],
+      targets: 'Safari 9',
     }),
   ],
 };
