@@ -10,8 +10,11 @@ export function Photos(props) {
   const [items, setItems] = useState([]);
   const [progress, setProgress] = useState(0);
   const [slideshowItems, setSlideshowItems] = useState();
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
+    console.log('Refreshing Images');
+
     let loadMore = true;
 
     setTimeout(async () => {
@@ -43,10 +46,14 @@ export function Photos(props) {
       }
     });
 
+    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 15 * 60 * 1000);
+    // const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 2000);
+
     return () => {
+      if (timer) clearTimeout(timer);
       loadMore = false;
     };
-  }, []);
+  }, [refreshCounter, setRefreshCounter]);
 
   return (
     <div>

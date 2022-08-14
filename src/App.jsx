@@ -18,7 +18,7 @@ export const App = () => {
       .then((data) => setLoggedIn(data.loggedIn))
       .catch((err) => {
         console.error(err);
-        setTimeout(() => location.reload(), 10000);
+        setTimeout(() => location.reload(), 3000);
       });
   }, []);
 
