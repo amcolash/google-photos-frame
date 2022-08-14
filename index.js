@@ -151,7 +151,7 @@ async function authAndCache(url, opts, res) {
 
   if (url.indexOf('mediaItems:search') !== -1) {
     json.mediaItems.forEach((m, i) => {
-      json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id };
+      json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id, mimeType: m.mimeType };
     });
   }
 

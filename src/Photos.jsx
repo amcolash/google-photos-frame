@@ -26,7 +26,9 @@ export function Photos(props) {
 
         page = data.nextPageToken;
         if (!page) loadMore = false;
-        allItems = [...allItems, ...data.mediaItems];
+
+        // Append new images and filter out non-image content, like videos
+        allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
 
         setItems(allItems);
         setProgress((index * 100) / album.mediaItemsCount);
