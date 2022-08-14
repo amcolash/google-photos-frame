@@ -16,6 +16,11 @@ const mockResponse = false;
 const port = process.env.PORT || 3500;
 let CACHE = {};
 
+// Clear the cache every 30 minutes
+setInterval(() => {
+  CACHE = {};
+}, 30 * 60 * 1000);
+
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 
@@ -108,7 +113,8 @@ app.get('/album/:id/:page?', async (req, res) => {
       albumId: req.params.id,
       pageToken: req.params.page,
     },
-    res
+    res,
+    true // for now, always skip cache since we will always need new base photos
   );
 });
 
@@ -128,7 +134,7 @@ app.get('/status', (req, res) => {
   res.send({ loggedIn: REFRESH_TOKEN !== undefined || mockResponse });
 });
 
-async function authAndCache(url, opts, res) {
+async function authAndCache(url, opts, res, skipCache) {
   if (!REFRESH_TOKEN) {
     res.send(401);
     return;
@@ -137,7 +143,7 @@ async function authAndCache(url, opts, res) {
   const access_token = (await oauth2Client.getAccessToken()).token;
   const key = url + (opts ? JSON.stringify(opts) : '');
 
-  if (CACHE[key]) {
+  if (CACHE[key] && !skipCache) {
     res.send(CACHE[key]);
     return;
   }

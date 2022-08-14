@@ -47,7 +47,6 @@ export function Photos(props) {
     });
 
     const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 15 * 60 * 1000);
-    // const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 2000);
 
     return () => {
       if (timer) clearTimeout(timer);
@@ -94,7 +93,7 @@ function PhotoList(props) {
         />
         <div>
           <h2 style={{ marginTop: 0 }}>
-            {props.album.mediaItemsCount} photos in "{props.album.title}"
+            {props.items.length} photos in "{props.album.title}"
           </h2>
           <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
             Back
