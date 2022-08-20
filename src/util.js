@@ -1,13 +1,15 @@
 const PORT = 3500;
 export const SERVER = import.meta.env.PROD ? 'https://home.amcolash.com:9090/frame' : `http://192.168.1.146:${PORT}`;
 
-const prefix = 'photo-frame';
-export const selectedAlbumName = `${prefix}-album`;
-export const durationName = `${prefix}-duration`;
-
 export const themeColor = '#5e9626';
-
 export const placeholder = false;
+
+export const slideshowActive = 'photo-frame-slideshow';
+
+export function setIntervalImmediately(func, interval) {
+  func();
+  return setInterval(func, interval);
+}
 
 // From https://stackoverflow.com/a/2450976/2303432
 export function shuffle(array) {

@@ -5,9 +5,15 @@ export function Albums(props) {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     fetch(`${SERVER}/albums`)
       .then((res) => res.json())
-      .then((data) => setAlbums(data.albums));
+      .then((data) => {
+        if (isMounted) setAlbums(data.albums);
+      });
+
+    return () => (isMounted = false);
   }, []);
 
   return (

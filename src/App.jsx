@@ -1,50 +1,36 @@
 import React, { useState } from 'react';
-import { useEffect } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Albums } from './Albums';
 import { Photos } from './Photos';
-import { selectedAlbumName, SERVER } from './util';
+import { useSetting } from './settings';
+import { SERVER } from './util';
 
 export const App = () => {
-  const selected = localStorage.getItem(selectedAlbumName);
+  const [client, setClient] = useState('iPad');
 
-  const [loggedIn, setLoggedIn] = useState(undefined);
-  const [selectedAlbum, setSelectedAlbum] = useState(selected ? JSON.parse(selected) : undefined);
-
-  useEffect(() => {
-    fetch(`${SERVER}/status`)
-      .then((res) => res.json())
-      .then((data) => setLoggedIn(data.loggedIn))
-      .catch((err) => {
-        console.error(err);
-        setTimeout(() => location.reload(), 3000);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (selectedAlbum) localStorage.setItem(selectedAlbumName, JSON.stringify(selectedAlbum));
-    else localStorage.removeItem(selectedAlbumName);
-  }, [selectedAlbum, setSelectedAlbum]);
+  const [loggedIn] = useSetting('login', client);
+  const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
 
   if (loggedIn)
     return (
       <div style={{ margin: '1em' }}>
         {!selectedAlbum && (
           <div>
-            <button
-              onClick={() => {
-                localStorage.removeItem(selectedAlbumName);
-                location.href = `${SERVER}/oauth?logout=true&redirect=${location.href}`;
-              }}
-              style={{ position: 'absolute', top: '1em', right: '1em' }}
-            >
-              Logout
-            </button>
+            <div style={{ position: 'absolute', top: '1em', right: '1em', display: 'flex', alignItems: 'center' }}>
+              <div style={{ marginRight: '1em' }}>{client}</div>
+              <button
+                onClick={() => {
+                  location.href = `${SERVER}/oauth?logout=true&redirect=${location.href}`;
+                }}
+              >
+                Logout
+              </button>
+            </div>
             <Albums setSelectedAlbum={setSelectedAlbum} />
           </div>
         )}
-        {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />}
+        {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} client={client} />}
       </div>
     );
 

@@ -3,7 +3,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import NoSleep from 'nosleep.js';
 
 import { Slideshow } from './Slideshow';
-import { placeholder, SERVER, shuffle, themeColor } from './util';
+import { placeholder, SERVER, shuffle, slideshowActive, themeColor } from './util';
 
 const noSleep = new NoSleep();
 
@@ -43,6 +43,11 @@ export function Photos(props) {
       }
 
       setProgress(1);
+
+      if (localStorage.getItem(slideshowActive)) {
+        const shuffledItems = shuffle([...allItems]);
+        setSlideshowItems(shuffledItems);
+      }
     });
 
     const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 30 * 60 * 1000);
@@ -82,17 +87,20 @@ export function Photos(props) {
           setSlideshowItems={setSlideshowItems}
         />
       )}
-      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} />}
+      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} client={props.client} />}
     </div>
   );
 }
 
 function PhotoList(props) {
+  const coverId = props.album.coverPhotoMediaItemId;
+  const coverPhoto = (props.items.find((i) => i.id === coverId) || { baseUrl: props.album.coverPhotoBaseUrl }).baseUrl;
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <img
-          src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${props.album.coverPhotoBaseUrl}=s128-c`}
+          src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${coverPhoto}=s128-c`}
           style={{ margin: '1em', marginLeft: 0 }}
         />
         <div>
@@ -106,6 +114,7 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]);
               props.setSlideshowItems(shuffledItems);
+              localStorage.setItem(slideshowActive, true);
             }}
             disabled={props.progress < 1}
           >
@@ -130,6 +139,7 @@ function PhotoList(props) {
             onClick={() => {
               const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
               props.setSlideshowItems([i, ...shuffledItems]);
+              localStorage.setItem(slideshowActive, true);
             }}
           >
             <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />

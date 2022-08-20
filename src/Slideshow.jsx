@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { durationName, placeholder, SERVER } from './util';
+import { useSetting } from './settings';
+import { placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
 let shuffleTimer;
 
 export function Slideshow(props) {
   const [overlay, setOverlay] = useState(true);
-
-  const parsedDuration = Number.parseInt(localStorage.getItem(durationName));
-  const [duration, setDuration] = useState(!isNaN(parsedDuration) ? parsedDuration : 5);
-
   const [current, setCurrent] = useState(0);
+
+  const [duration, setDuration] = useSetting('duration', props.client, 60);
 
   useEffect(() => {
     clearTimeout(shuffleTimer);
     shuffleTimer = setTimeout(() => setCurrent((current + 1) % props.items.length), duration * 1000);
-
-    localStorage.setItem(durationName, duration);
   }, [current, duration, setCurrent, props.items]);
 
   useEffect(() => {
@@ -49,12 +46,13 @@ export function Slideshow(props) {
         <button
           onClick={() => {
             props.setSlideshowItems();
+            localStorage.removeItem(slideshowActive);
           }}
         >
           Back
         </button>
         <div style={{ marginTop: '1em' }}>
-          <input type="range" value={duration} min={5} max={5 * 60} onChange={(e) => setDuration(e.target.value)} />
+          <input type="range" value={duration} min={5} max={5 * 60} step={5} onChange={(e) => setDuration(e.target.value)} />
           <div>
             Image Duration {min}:{sec}
           </div>
@@ -73,6 +71,7 @@ export function Slideshow(props) {
           objectFit: 'contain',
           background: 'black',
         }}
+        onError={() => setCurrent((current + 1) % props.items.length)}
       />
     </div>
   );

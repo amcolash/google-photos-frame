@@ -6,10 +6,12 @@ const { default: fetch } = require('node-fetch');
 
 require('dotenv').config();
 
-nconf.use('file', { file: './token.json' });
+nconf.use('file', { file: './settings.json' });
 nconf.load();
+nconf.save();
 
 let REFRESH_TOKEN = nconf.get('refresh_token');
+let settings = nconf.get('settings') || { iPad: { duration: 60 } };
 
 const clientUrl = 'http://192.168.1.146:5173';
 const mockResponse = false;
@@ -44,6 +46,7 @@ if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
 if (!mockResponse && (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URL)) process.exit(1);
 
 app.use(cors());
+app.use(express.json());
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Example app listening on port ${port}`);
@@ -130,8 +133,33 @@ app.get('/image', (req, res) => {
   );
 });
 
-app.get('/status', (req, res) => {
-  res.send({ loggedIn: REFRESH_TOKEN !== undefined || mockResponse });
+app.get('/settings/:client/:option', (req, res) => {
+  const { client, option } = req.params;
+
+  if (option === 'login') {
+    res.send({ login: REFRESH_TOKEN !== undefined || mockResponse });
+    return;
+  }
+
+  if (settings[client]) {
+    res.send({ [option]: settings[client][option] });
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+app.post('/settings/:client/:option', (req, res) => {
+  const { client, option } = req.params;
+
+  if (settings[client]) {
+    settings[client][option] = req.body[option];
+    nconf.set('settings', settings);
+    nconf.save();
+
+    res.send({ [option]: settings[client][option] });
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 async function authAndCache(url, opts, res, skipCache) {
@@ -157,7 +185,7 @@ async function authAndCache(url, opts, res, skipCache) {
     const json = await data.json();
 
     if (url.indexOf('mediaItems:search') !== -1) {
-      json.mediaItems.forEach((m, i) => {
+      (json.mediaItems || []).forEach((m, i) => {
         json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id, mimeType: m.mimeType };
       });
     }
