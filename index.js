@@ -3,6 +3,9 @@ const express = require('express');
 const { google } = require('googleapis');
 const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
+const { NodeSSH } = require('node-ssh');
+
+const ssh = new NodeSSH();
 
 require('dotenv').config();
 
@@ -21,7 +24,7 @@ let CACHE = {};
 // Clear the cache every 30 minutes
 setInterval(() => {
   CACHE = {};
-}, 30 * 60 * 1000);
+}, 15 * 60 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
@@ -160,6 +163,29 @@ app.post('/settings/:client/:option', (req, res) => {
   } else {
     res.sendStatus(404);
   }
+});
+
+app.get('/ipad', async (req, res) => {
+  let command;
+  if (req.query.lock) command = 'activator send libactivator.lockscreen.show';
+  if (req.query.unlock) command = 'activator send libactivator.lockscreen.dismiss';
+
+  if (command) {
+    try {
+      const connection = await ssh.connect({
+        host: process.env.IPAD_IP,
+        username: 'root',
+        password: process.env.IPAD_PASSWORD,
+      });
+
+      await connection.execCommand(command);
+
+      res.sendStatus(200);
+    } catch (err) {
+      console.error(err);
+      res.sendStatus(500);
+    }
+  } else res.sendStatus(404);
 });
 
 async function authAndCache(url, opts, res, skipCache) {

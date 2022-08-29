@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import NoSleep from 'nosleep.js';
+import equal from 'fast-deep-equal/es6';
 
 import { Slideshow } from './Slideshow';
 import { placeholder, SERVER, shuffle, slideshowActive, themeColor } from './util';
+import { usePrevious } from './hooks/usePrevious';
 
 const noSleep = new NoSleep();
 
 export function Photos(props) {
   const album = props.selectedAlbum;
+
+  const previousAlbum = usePrevious(album);
 
   const [items, setItems] = useState([]);
   const [progress, setProgress] = useState(0);
@@ -50,13 +54,17 @@ export function Photos(props) {
       }
     });
 
-    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 30 * 60 * 1000);
+    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 15 * 60 * 1000);
 
     return () => {
       if (timer) clearTimeout(timer);
       loadMore = false;
     };
   }, [refreshCounter, setRefreshCounter]);
+
+  useEffect(() => {
+    if (!equal(album, previousAlbum)) setRefreshCounter(refreshCounter + 1);
+  }, [album, previousAlbum, refreshCounter, setRefreshCounter]);
 
   useEffect(() => {
     if (slideshowItems) noSleep.enable();
@@ -87,7 +95,7 @@ export function Photos(props) {
           setSlideshowItems={setSlideshowItems}
         />
       )}
-      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} client={props.client} />}
+      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} client={props.client} noSleep={noSleep} />}
     </div>
   );
 }

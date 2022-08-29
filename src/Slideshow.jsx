@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useSetting } from './settings';
+
+import { useSetting } from './hooks/useSetting';
 import { placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
@@ -56,6 +57,7 @@ export function Slideshow(props) {
           <div>
             Image Duration {min}:{sec}
           </div>
+          {!props.noSleep.isEnabled && <div>NoSleep Disabled</div>}
         </div>
       </div>
 
@@ -71,7 +73,10 @@ export function Slideshow(props) {
           objectFit: 'contain',
           background: 'black',
         }}
-        onError={() => setCurrent((current + 1) % props.items.length)}
+        onError={(e) => {
+          console.error(e);
+          setCurrent((current + 1) % props.items.length || 0);
+        }}
       />
     </div>
   );

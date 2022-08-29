@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import equal from 'fast-deep-equal/es6/react';
-import { SERVER, setIntervalImmediately } from './util';
+import { useEffect, useState } from 'react';
+import equal from 'fast-deep-equal/es6';
+
+import { SERVER, setIntervalImmediately } from '../util';
+import { usePrevious } from './usePrevious';
 
 export function useSetting(optionName, client, defaultValue) {
   const [option, setOption] = useState(defaultValue);
@@ -35,17 +37,4 @@ export function useSetting(optionName, client, defaultValue) {
   }, [option]);
 
   return [option, setOption];
-}
-
-// From https://usehooks.com/usePrevious/
-function usePrevious(value) {
-  // The ref object is a generic container whose current property is mutable ...
-  // ... and can hold any value, similar to an instance property on a class
-  const ref = useRef();
-  // Store current value in ref
-  useEffect(() => {
-    ref.current = value;
-  }, [value]); // Only re-run if value changes
-  // Return previous value (happens before update in useEffect above)
-  return ref.current;
 }

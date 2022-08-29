@@ -3,7 +3,8 @@ import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Albums } from './Albums';
 import { Photos } from './Photos';
-import { useSetting } from './settings';
+
+import { useSetting } from './hooks/useSetting';
 import { SERVER } from './util';
 
 export const App = () => {
