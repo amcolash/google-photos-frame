@@ -1,11 +1,13 @@
+const { time } = require('console');
 const cors = require('cors');
 const express = require('express');
+const { stat } = require('fs');
 const { google } = require('googleapis');
 const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
 const { NodeSSH } = require('node-ssh');
-
-const ssh = new NodeSSH();
+const { join } = require('path');
+const ExifImage = require('exif').ExifImage;
 
 require('dotenv').config();
 
@@ -21,10 +23,42 @@ const mockResponse = false;
 const port = process.env.PORT || 3500;
 let CACHE = {};
 
-// Clear the cache every 30 minutes
+const status = { locked: undefined, brightness: undefined, active: undefined, ping: 0 };
+const cutoff = 0.5;
+
+const lockCommand = 'activator send libactivator.lockscreen.show';
+const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
+
+const ssh = new NodeSSH();
+
+// Keep ssh connection alive every minute
+setIntervalImmediately(() => {
+  if (!ssh.isConnected())
+    ssh
+      .connect({
+        host: process.env.IPAD_IP,
+        username: 'mobile',
+        password: process.env.IPAD_PASSWORD,
+      })
+      .then(() => console.log('Connected to server'))
+      .catch((err) => console.error(`Error connecting to server\n${err}`));
+}, 60 * 1000);
+
+// Clear the cache every 15 minutes
 setInterval(() => {
   CACHE = {};
 }, 15 * 60 * 1000);
+
+// Check brightness every 20 seconds
+setInterval(checkAmbientLight, 20 * 1000);
+
+// check on first load
+setTimeout(checkAmbientLight, 6 * 1000);
+
+// update status based on ping
+setIntervalImmediately(() => {
+  status.active = Date.now - status.ping < 20 * 1000;
+}, 5 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
@@ -167,18 +201,12 @@ app.post('/settings/:client/:option', (req, res) => {
 
 app.get('/ipad', async (req, res) => {
   let command;
-  if (req.query.lock) command = 'activator send libactivator.lockscreen.show';
-  if (req.query.unlock) command = 'activator send libactivator.lockscreen.dismiss';
+  if (req.query.lock) command = lockCommand;
+  if (req.query.unlock) command = unlockCommand;
 
   if (command) {
     try {
-      const connection = await ssh.connect({
-        host: process.env.IPAD_IP,
-        username: 'root',
-        password: process.env.IPAD_PASSWORD,
-      });
-
-      await connection.execCommand(command);
+      await ssh.execCommand(command);
 
       res.sendStatus(200);
     } catch (err) {
@@ -187,6 +215,8 @@ app.get('/ipad', async (req, res) => {
     }
   } else res.sendStatus(404);
 });
+
+app.get('/status', (req, res) => res.send(status));
 
 async function authAndCache(url, opts, res, skipCache) {
   if (!REFRESH_TOKEN) {
@@ -224,6 +254,43 @@ async function authAndCache(url, opts, res, skipCache) {
   }
 }
 
+async function checkAmbientLight() {
+  // Only try to talk with iPad when on the webpage
+  if (!status.active) return;
+
+  if (status.locked === undefined) {
+    await ssh.execCommand(unlockCommand);
+    status.locked = false;
+  }
+
+  console.log('Checking ambient light');
+  try {
+    const remoteFile = '/User/ambient.jpg';
+    const localFile = join(__dirname, 'ambient.jpg');
+
+    await ssh.execCommand(`camshot -front ${remoteFile}`);
+    await ssh.getFile(localFile, remoteFile);
+
+    new ExifImage({ image: localFile }, async function (error, exifData) {
+      if (error) throw error.message;
+
+      status.brightness = exifData.exif.BrightnessValue;
+      console.log(`Ambient light level: ${status.brightness}`);
+
+      if (status.brightness > cutoff && status.locked) {
+        status.locked = false;
+        await ssh.execCommand(unlockCommand);
+      }
+      if (status.brightness <= cutoff && !status.locked) {
+        status.locked = true;
+        await ssh.execCommand(lockCommand);
+      }
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 // Seeded rng: https://stackoverflow.com/a/47593316/2303432
 function mulberry32(a) {
   return function () {
@@ -232,4 +299,9 @@ function mulberry32(a) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function setIntervalImmediately(func, interval) {
+  func();
+  return setInterval(func, interval);
 }
