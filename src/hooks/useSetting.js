@@ -3,11 +3,13 @@ import equal from 'fast-deep-equal/es6';
 
 import { SERVER, setIntervalImmediately } from '../util';
 import { usePrevious } from './usePrevious';
+import { useDebounce } from './useDebounce';
 
 export function useSetting(optionName, client, defaultValue) {
   const [option, setOption] = useState(defaultValue);
   const [firstLoad, setFirstLoad] = useState(true);
 
+  const debouncedOption = useDebounce(option, 500);
   const prevOption = usePrevious(option);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function useSetting(optionName, client, defaultValue) {
     }
 
     setFirstLoad(false);
-  }, [option]);
+  }, [debouncedOption]);
 
   return [option, setOption];
 }

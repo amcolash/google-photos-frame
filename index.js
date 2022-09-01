@@ -24,7 +24,7 @@ const port = process.env.PORT || 3500;
 let CACHE = {};
 
 const status = { locked: undefined, brightness: undefined };
-const cutoff = 0.5;
+const cutoff = 0;
 
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
