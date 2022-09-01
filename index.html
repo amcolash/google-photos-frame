@@ -24,6 +24,8 @@
         border-radius: 7%;
       }
       button {
+        display: inline-flex;
+        align-items: center;
         background: none;
         border: 1px solid #333;
         padding: 0.5em 1em;
@@ -31,6 +33,9 @@
       }
       button:hover:not(:disabled) {
         background: #ddd;
+      }
+      button svg {
+        margin-right: 0.35em;
       }
       h2 {
         margin-top: 0.5em;
@@ -40,6 +45,18 @@
         .albums > .album {
           margin: 1em 0;
         }
+      }
+
+      .inverse,
+      .inverse button {
+        color: #cacaca;
+      }
+
+      .inverse button {
+        border-color: #cacaca;
+      }
+      .inverse button:hover:not(:disabled) {
+        background: #555;
       }
     </style>
   </head>

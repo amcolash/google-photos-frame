@@ -3,8 +3,11 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import NoSleep from 'nosleep.js';
 import equal from 'fast-deep-equal/es6';
 
+import { ReactComponent as Back } from './img/arrow-left.svg';
+import { ReactComponent as Play } from './img/play.svg';
+
 import { Slideshow } from './Slideshow';
-import { placeholder, SERVER, shuffle, slideshowActive, themeColor } from './util';
+import { colors, placeholder, SERVER, shuffle, slideshowActive } from './util';
 import { usePrevious } from './hooks/usePrevious';
 
 const noSleep = new NoSleep();
@@ -80,7 +83,7 @@ export function Photos(props) {
           left: 0,
           width: `calc(100% * ${progress})`,
           height: '0.25em',
-          backgroundColor: themeColor,
+          backgroundColor: colors.theme,
           transition: 'width 1s, opacity 1s 1.5s',
           opacity: progress < 1 ? '1' : '0',
         }}
@@ -116,6 +119,7 @@ function PhotoList(props) {
             {props.items.length} photos in "{props.album.title}"
           </h2>
           <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
+            <Back />
             Back
           </button>
           <button
@@ -126,6 +130,7 @@ function PhotoList(props) {
             }}
             disabled={props.progress < 1}
           >
+            <Play />
             Slideshow
           </button>
         </div>
