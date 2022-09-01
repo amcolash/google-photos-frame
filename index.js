@@ -23,7 +23,7 @@ const mockResponse = false;
 const port = process.env.PORT || 3500;
 let CACHE = {};
 
-const status = { locked: undefined, brightness: undefined, active: undefined, ping: 0 };
+const status = { locked: undefined, brightness: undefined };
 const cutoff = 0.5;
 
 const lockCommand = 'activator send libactivator.lockscreen.show';
@@ -54,11 +54,6 @@ setInterval(checkAmbientLight, 20 * 1000);
 
 // check on first load
 setTimeout(checkAmbientLight, 6 * 1000);
-
-// update status based on ping
-setIntervalImmediately(() => {
-  status.active = Date.now - status.ping < 20 * 1000;
-}, 5 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
@@ -255,15 +250,11 @@ async function authAndCache(url, opts, res, skipCache) {
 }
 
 async function checkAmbientLight() {
-  // Only try to talk with iPad when on the webpage
-  if (!status.active) return;
-
   if (status.locked === undefined) {
     await ssh.execCommand(unlockCommand);
     status.locked = false;
   }
 
-  console.log('Checking ambient light');
   try {
     const remoteFile = '/User/ambient.jpg';
     const localFile = join(__dirname, 'ambient.jpg');
@@ -272,10 +263,13 @@ async function checkAmbientLight() {
     await ssh.getFile(localFile, remoteFile);
 
     new ExifImage({ image: localFile }, async function (error, exifData) {
-      if (error) throw error.message;
+      if (error) {
+        console.error(error.message);
+        return;
+      }
 
       status.brightness = exifData.exif.BrightnessValue;
-      console.log(`Ambient light level: ${status.brightness}`);
+      console.log(`Ambient light level: ${status.brightness.toFixed(4)}`);
 
       if (status.brightness > cutoff && status.locked) {
         status.locked = false;
