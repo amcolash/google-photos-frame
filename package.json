@@ -24,6 +24,7 @@
     "react-lazy-load-image-component": "^1.5.5",
     "react-social-login-buttons": "^3.6.1",
     "vite-plugin-legacy": "^2.1.0",
+    "vite-plugin-svgr": "^2.2.1",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {

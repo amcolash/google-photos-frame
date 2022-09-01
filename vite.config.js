@@ -1,4 +1,5 @@
 import legacy from '@vitejs/plugin-legacy';
+import svgr from 'vite-plugin-svgr';
 
 export default {
   base: '/frame/',
@@ -10,5 +11,6 @@ export default {
     legacy({
       targets: 'Safari 9',
     }),
+    svgr(),
   ],
 };
