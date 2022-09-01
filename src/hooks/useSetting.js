@@ -36,7 +36,7 @@ export function useSetting(optionName, client, defaultValue) {
     }
 
     setFirstLoad(false);
-  }, [debouncedOption]);
+  }, [option, prevOption, debouncedOption]);
 
   return [option, setOption];
 }

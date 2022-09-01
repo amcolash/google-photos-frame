@@ -250,6 +250,8 @@ async function authAndCache(url, opts, res, skipCache) {
 }
 
 async function checkAmbientLight() {
+  if (!settings.iPad.ambient) return;
+
   if (status.locked === undefined) {
     await ssh.execCommand(unlockCommand);
     status.locked = false;
