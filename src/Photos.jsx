@@ -129,7 +129,7 @@ function PhotoList(props) {
   const coverPhoto = (props.items.find((i) => i.id === coverId) || { baseUrl: props.album.coverPhotoBaseUrl }).baseUrl;
 
   return (
-    <div>
+    <div className="photoList">
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <img src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${coverPhoto}=s128-c`} style={{ marginRight: '1em' }} />
         <div>
@@ -169,7 +169,11 @@ function PhotoList(props) {
               localStorage.setItem(slideshowActive, true);
             }}
           >
-            <LazyLoadImage src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`} threshold={1000} />
+            <LazyLoadImage
+              className="photo"
+              src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`}
+              threshold={1000}
+            />
           </button>
         ))}
       </div>

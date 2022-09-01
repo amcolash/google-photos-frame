@@ -40,10 +40,30 @@
       h2 {
         margin-top: 0.5em;
       }
+      .albums {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 12em);
+        place-content: flex-start space-between;
+        gap: 1.5em;
+      }
+      .album {
+        display: flex;
+        align-items: center;
+      }
 
       @supports not (display: grid) {
+        .albums {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
         .albums > .album {
           margin: 1em 0;
+          width: 300px;
+          max-width: 300px;
+        }
+        .photoList .photo {
+          margin: 0.35em;
         }
       }
 

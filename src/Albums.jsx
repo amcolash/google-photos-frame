@@ -27,10 +27,7 @@ export function Albums(props) {
   }, []);
 
   return (
-    <div
-      className="albums"
-      style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 12em)', placeContent: 'flex-start space-between', gap: '1.5em' }}
-    >
+    <div className="albums">
       <HeaderLeft headerRef={props.headerRef}>
         <h2 style={{ margin: 0 }}>Albums</h2>
       </HeaderLeft>
@@ -50,7 +47,7 @@ export function Albums(props) {
       {albums
         .sort((a, b) => a.title.localeCompare(b.title))
         .map((a) => (
-          <div className="album" key={a.id} onClick={() => props.setSelectedAlbum(a)} style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="album" key={a.id} onClick={() => props.setSelectedAlbum(a)}>
             <img
               src={placeholder ? `${SERVER}/image?size=96&id=${a.id}` : `${a.coverPhotoBaseUrl}=s96-c`}
               style={{ marginRight: '0.5em' }}
