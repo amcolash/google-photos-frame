@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
-import { ReactComponent as Logout } from './img/log-out.svg';
 import { ReactComponent as Zap } from './img/zap.svg';
 import { ReactComponent as ZapOff } from './img/zap-off.svg';
 
@@ -14,6 +13,8 @@ import { SERVER, colors } from './util';
 export const App = () => {
   const [client, setClient] = useState('iPad');
 
+  const headerRef = useRef();
+
   const [loggedIn] = useSetting('login', client);
   const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
   const [ambientMode, setAmbientMode] = useSetting('ambient', client, true);
@@ -22,36 +23,33 @@ export const App = () => {
     return (
       <div>
         <div
-          className="inverse"
+          className="inverse header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '1em',
+            padding: '1.25em',
             background: colors.border,
+            zIndex: 1,
+            position: 'relative',
+            transition: '0.5s opacity',
           }}
+          ref={headerRef}
         >
-          <h2 style={{ margin: 0 }}>{!selectedAlbum ? 'Albums' : 'Photos'}</h2>
+          <div className="left" style={{ display: 'flex', alignItems: 'center' }} />
+
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.35em', marginRight: '1em' }}>
+            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', margin: '0 1.5em' }}>
               {ambientMode ? <Zap style={{ marginRight: 0 }} /> : <ZapOff style={{ marginRight: 0 }} />}
             </button>
-
-            <div style={{ margin: '0.5em 0.75em' }}>{client}</div>
-            <button
-              onClick={() => {
-                location.href = `${SERVER}/oauth?logout=true&redirect=${location.href}`;
-              }}
-            >
-              <Logout />
-              Logout
-            </button>
+            <div className="right" style={{ display: 'flex', alignItems: 'center' }} />
           </div>
         </div>
 
-        <div style={{ margin: '1em' }}>
-          {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} />}
-          {selectedAlbum && <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} client={client} />}
+        <div style={{ margin: '1.5em' }}>
+          {!selectedAlbum && <Albums setSelectedAlbum={setSelectedAlbum} client={client} headerRef={headerRef} />}
+          {selectedAlbum && (
+            <Photos selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} client={client} headerRef={headerRef} />
+          )}
         </div>
       </div>
     );

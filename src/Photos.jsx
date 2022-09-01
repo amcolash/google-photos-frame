@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import NoSleep from 'nosleep.js';
 import equal from 'fast-deep-equal/es6';
@@ -12,6 +13,12 @@ import { usePrevious } from './hooks/usePrevious';
 
 const noSleep = new NoSleep();
 
+const HeaderLeft = (props) =>
+  props.headerRef.current ? ReactDOM.createPortal(props.children, props.headerRef.current.querySelector('.left')) : null;
+
+const HeaderRight = (props) =>
+  props.headerRef.current ? ReactDOM.createPortal(props.children, props.headerRef.current.querySelector('.right')) : null;
+
 export function Photos(props) {
   const album = props.selectedAlbum;
 
@@ -23,8 +30,6 @@ export function Photos(props) {
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
-    console.log('Refreshing Images');
-
     let loadMore = true;
 
     setTimeout(async () => {
@@ -81,6 +86,7 @@ export function Photos(props) {
           position: 'fixed',
           top: 0,
           left: 0,
+          zIndex: 2,
           width: `calc(100% * ${progress})`,
           height: '0.25em',
           backgroundColor: colors.theme,
@@ -90,15 +96,30 @@ export function Photos(props) {
       />
 
       {!slideshowItems && (
-        <PhotoList
-          album={album}
-          items={items}
-          progress={progress}
-          setSelectedAlbum={props.setSelectedAlbum}
+        <>
+          <HeaderLeft headerRef={props.headerRef}>
+            <h2 style={{ margin: 0 }}>Photos</h2>
+          </HeaderLeft>
+          <HeaderRight headerRef={props.headerRef}>
+            <button onClick={() => props.setSelectedAlbum()}>
+              <Back />
+              Back
+            </button>
+          </HeaderRight>
+
+          <PhotoList album={album} items={items} progress={progress} setSlideshowItems={setSlideshowItems} />
+        </>
+      )}
+      {slideshowItems && (
+        <Slideshow
+          title={album.title}
+          items={slideshowItems}
           setSlideshowItems={setSlideshowItems}
+          client={props.client}
+          noSleep={noSleep}
+          headerRef={props.headerRef}
         />
       )}
-      {slideshowItems && <Slideshow items={slideshowItems} setSlideshowItems={setSlideshowItems} client={props.client} noSleep={noSleep} />}
     </div>
   );
 }
@@ -110,18 +131,11 @@ function PhotoList(props) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img
-          src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${coverPhoto}=s128-c`}
-          style={{ margin: '1em', marginLeft: 0 }}
-        />
+        <img src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${coverPhoto}=s128-c`} style={{ marginRight: '1em' }} />
         <div>
           <h2 style={{ marginTop: 0 }}>
             {props.items.length} photos in "{props.album.title}"
           </h2>
-          <button onClick={() => props.setSelectedAlbum()} style={{ marginRight: '0.75em' }}>
-            <Back />
-            Back
-          </button>
           <button
             onClick={() => {
               const shuffledItems = shuffle([...props.items]);
