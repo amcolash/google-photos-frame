@@ -9,7 +9,7 @@ export function useSetting(optionName, client, defaultValue) {
   const [option, setOption] = useState(defaultValue);
   const [firstLoad, setFirstLoad] = useState(true);
 
-  const debouncedOption = useDebounce(option, 500);
+  const debouncedOption = useDebounce(option, 1000);
   const prevOption = usePrevious(option);
 
   useEffect(() => {
@@ -34,6 +34,8 @@ export function useSetting(optionName, client, defaultValue) {
         body: JSON.stringify({ [optionName]: option }),
       });
     }
+
+    if (optionName === 'serverTime' && prevOption !== undefined && option !== prevOption) window.location.reload();
 
     setFirstLoad(false);
   }, [option, prevOption, debouncedOption]);

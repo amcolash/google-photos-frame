@@ -18,6 +18,7 @@ export const App = () => {
   const [loggedIn] = useSetting('login', client);
   const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
   const [ambientMode, setAmbientMode] = useSetting('ambient', client, true);
+  const [serverTime] = useSetting('serverTime', client);
 
   if (loggedIn)
     return (

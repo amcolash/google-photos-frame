@@ -21,6 +21,7 @@ let settings = nconf.get('settings') || { iPad: { duration: 60 } };
 const clientUrl = 'http://192.168.1.146:5173';
 const mockResponse = false;
 const port = process.env.PORT || 3500;
+const serverTime = Date.now();
 let CACHE = {};
 
 const status = { locked: undefined, brightness: undefined };
@@ -170,6 +171,11 @@ app.get('/settings/:client/:option', (req, res) => {
 
   if (option === 'login') {
     res.send({ login: REFRESH_TOKEN !== undefined || mockResponse });
+    return;
+  }
+
+  if (option === 'serverTime') {
+    res.send({ serverTime });
     return;
   }
 
