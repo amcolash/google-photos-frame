@@ -102,6 +102,20 @@ export function Slideshow(props) {
           }}
         />
       )}
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '1em',
+          right: '1em',
+          color: 'white',
+          textShadow: '0 0 0.35em black',
+          opacity: overlay ? 1 : 0,
+          transition: 'opacity 0.5s',
+        }}
+      >
+        {current + 1} / {props.items.length}
+      </div>
     </div>
   );
 }
