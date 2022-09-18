@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { ReactComponent as Back } from './img/arrow-left.svg';
+import { ReactComponent as Crop } from './img/crop.svg';
 
 import { useSetting } from './hooks/useSetting';
 import { placeholder, SERVER, slideshowActive } from './util';
@@ -20,6 +21,7 @@ export function Slideshow(props) {
   const [current, setCurrent] = useState(0);
 
   const [duration, setDuration] = useSetting('duration', props.client, 60);
+  const [crop, setCrop] = useSetting('crop', props.client, false);
 
   useEffect(() => {
     clearTimeout(shuffleTimer);
@@ -52,6 +54,9 @@ export function Slideshow(props) {
       </HeaderLeft>
       <HeaderRight headerRef={props.headerRef}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button onClick={() => setCrop(!crop)} style={{ marginRight: '1.5em' }}>
+            <Crop /> {crop ? '✓' : 'x'}
+          </button>
           <span style={{ whiteSpace: 'nowrap' }}>
             Duration {min}:{sec}
           </span>
@@ -88,7 +93,7 @@ export function Slideshow(props) {
             position: 'absolute',
             top: 0,
             left: 0,
-            objectFit: 'contain',
+            objectFit: crop ? 'cover' : 'contain',
             background: 'black',
           }}
           onError={(e) => {
