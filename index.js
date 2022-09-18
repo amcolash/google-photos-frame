@@ -25,7 +25,7 @@ const serverTime = Date.now();
 let CACHE = {};
 
 const status = { locked: undefined, brightness: undefined };
-const cutoff = 0;
+const cutoff = -2.5;
 
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';

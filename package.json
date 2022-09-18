@@ -6,7 +6,8 @@
   "scripts": {
     "start": "vite --host",
     "build": "vite build",
-    "server": "nodemon --ignore settings.json --ignore src/"
+    "server": "nodemon --ignore settings.json --ignore src/",
+    "watch": "nodemon --watch src -e js,jsx,svg,html --exec 'npm run build'"
   },
   "dependencies": {
     "cors": "^2.8.5",

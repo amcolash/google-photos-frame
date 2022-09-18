@@ -32,7 +32,7 @@ export const App = () => {
             background: colors.border,
             zIndex: 1,
             position: 'relative',
-            transition: '0.5s opacity',
+            transition: 'opacity 0.5s',
           }}
           ref={headerRef}
         >
