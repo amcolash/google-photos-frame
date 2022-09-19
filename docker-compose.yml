@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  garage-remote:
+    image: amcolash/photo-frame
+    container_name: photo-frame
+    build: ./
+    network_mode: 'host'
+    entrypoint: npm run docker
+    env_file:
+      - .env
+    restart: unless-stopped

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "vite --host",
     "build": "vite build",
+    "docker": "node index.js",
     "server": "nodemon --ignore settings.json --ignore src/",
     "watch": "nodemon --watch src -e js,jsx,svg,html --exec 'npm run build'"
   },
