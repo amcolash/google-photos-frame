@@ -25,7 +25,7 @@ const serverTime = Date.now();
 let CACHE = {};
 
 const status = { locked: undefined, brightness: undefined };
-const cutoff = -2.5;
+const cutoff = -4.5;
 
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
@@ -258,12 +258,12 @@ async function authAndCache(url, opts, res, skipCache) {
 async function checkAmbientLight() {
   if (!settings.iPad.ambient) return;
 
-  if (status.locked === undefined) {
-    await ssh.execCommand(unlockCommand);
-    status.locked = false;
-  }
-
   try {
+    if (status.locked === undefined) {
+      await ssh.execCommand(unlockCommand);
+      status.locked = false;
+    }
+
     const remoteFile = '/User/ambient.jpg';
     const localFile = join(__dirname, 'ambient.jpg');
 

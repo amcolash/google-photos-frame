@@ -48,7 +48,12 @@ export function Slideshow(props) {
     .padStart(2, '0');
 
   return (
-    <div onClick={() => setOverlay(true)}>
+    <div
+      onClick={() => {
+        setOverlay(true);
+        props.noSleep.enable();
+      }}
+    >
       <HeaderLeft headerRef={props.headerRef}>
         <h2 style={{ margin: 0 }}>{props.title} Slideshow</h2>
       </HeaderLeft>
