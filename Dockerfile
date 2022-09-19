@@ -17,4 +17,4 @@ COPY . ./
 RUN npm run build
 
 # Set things up
-EXPOSE 3500
+EXPOSE 8500

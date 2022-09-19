@@ -18,9 +18,9 @@ nconf.save();
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
 
-const clientUrl = 'http://192.168.1.146:5173';
 const mockResponse = false;
-const port = process.env.PORT || 3500;
+const port = process.env.PORT || 8500;
+const clientUrl = `http://192.168.1.101:${port}`;
 const serverTime = Date.now();
 let CACHE = {};
 
