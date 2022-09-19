@@ -6,6 +6,8 @@ services:
     container_name: photo-frame
     build: ./
     network_mode: 'host'
+    volumes:
+      - ./settings.json:/usr/src/app/settings.json
     entrypoint: npm run docker
     env_file:
       - .env
