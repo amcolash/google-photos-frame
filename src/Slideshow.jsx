@@ -51,7 +51,11 @@ export function Slideshow(props) {
     <div
       onClick={() => {
         setOverlay(true);
-        props.noSleep.enable();
+        try {
+          props.noSleep.enable();
+        } catch (err) {
+          console.error(err);
+        }
       }}
     >
       <HeaderLeft headerRef={props.headerRef}>

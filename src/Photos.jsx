@@ -75,8 +75,12 @@ export function Photos(props) {
   }, [album, previousAlbum, refreshCounter, setRefreshCounter]);
 
   useEffect(() => {
-    if (slideshowItems) noSleep.enable();
-    else noSleep.disable();
+    try {
+      if (slideshowItems) noSleep.enable();
+      else noSleep.disable();
+    } catch (err) {
+      console.error(err);
+    }
   }, [slideshowItems]);
 
   return (
