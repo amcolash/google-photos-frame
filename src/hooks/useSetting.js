@@ -35,10 +35,8 @@ export function useSetting(optionName, client, defaultValue) {
       });
     }
 
-    if (optionName === 'serverTime' && prevOption !== undefined && option !== prevOption) window.location.reload();
-
     setFirstLoad(false);
   }, [option, prevOption, debouncedOption]);
 
-  return [option, setOption];
+  return [option, setOption, prevOption];
 }

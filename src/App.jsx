@@ -1,6 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
+import { ReactComponent as Clock } from './img/clock.svg';
 import { ReactComponent as Zap } from './img/zap.svg';
 import { ReactComponent as ZapOff } from './img/zap-off.svg';
 
@@ -18,7 +19,11 @@ export const App = () => {
   const [loggedIn] = useSetting('login', client);
   const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
   const [ambientMode, setAmbientMode] = useSetting('ambient', client, true);
-  const [serverTime] = useSetting('serverTime', client);
+  const [serverTime, setServerTime, prevServerTime] = useSetting('serverTime', client);
+
+  useEffect(() => {
+    if (prevServerTime !== undefined && serverTime !== prevServerTime) window.location.reload();
+  }, [serverTime, prevServerTime]);
 
   if (loggedIn)
     return (
@@ -39,7 +44,10 @@ export const App = () => {
           <div className="left" style={{ display: 'flex', alignItems: 'center' }} />
 
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', margin: '0 1.5em' }}>
+            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', margin: '0 1.5em' }}>
+              <Clock style={{ marginRight: 0 }} />
+            </button>
+            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '1.5em' }}>
               {ambientMode ? <Zap style={{ marginRight: 0 }} /> : <ZapOff style={{ marginRight: 0 }} />}
             </button>
             <div className="right" style={{ display: 'flex', alignItems: 'center' }} />

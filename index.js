@@ -1,7 +1,5 @@
-const { time } = require('console');
 const cors = require('cors');
 const express = require('express');
-const { stat } = require('fs');
 const { google } = require('googleapis');
 const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
@@ -18,10 +16,12 @@ nconf.save();
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
 
+// Update server time for each client
+Object.values(settings).forEach((s) => (s.serverTime = Date.now()));
+
 const mockResponse = false;
 const port = process.env.PORT || 8500;
 const clientUrl = `http://192.168.1.101:${port}`;
-const serverTime = Date.now();
 let CACHE = {};
 
 const status = { locked: undefined, brightness: undefined };
@@ -171,11 +171,6 @@ app.get('/settings/:client/:option', (req, res) => {
 
   if (option === 'login') {
     res.send({ login: REFRESH_TOKEN !== undefined || mockResponse });
-    return;
-  }
-
-  if (option === 'serverTime') {
-    res.send({ serverTime });
     return;
   }
 
