@@ -26,6 +26,13 @@ export function Slideshow(props) {
   useEffect(() => {
     clearTimeout(shuffleTimer);
     shuffleTimer = setTimeout(() => setCurrent((current + 1) % props.items.length), duration * 1000);
+
+    // Preload the next image to try and prevent errors
+    setTimeout(() => {
+      const nextImg = new Image();
+      const next = props.items[(current + 2) % props.items.length];
+      nextImg.src = placeholder ? `${SERVER}/image?size=1200&id=${next.id}` : `${next.baseUrl}=s1200-c`;
+    }, 5000);
   }, [current, duration, setCurrent, props.items]);
 
   useEffect(() => {
