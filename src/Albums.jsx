@@ -21,7 +21,8 @@ export function Albums(props) {
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) setAlbums(data.albums);
-      });
+      })
+      .catch((err) => console.error(err));
 
     return () => (isMounted = false);
   }, []);

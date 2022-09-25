@@ -39,18 +39,22 @@ export function Photos(props) {
       let allItems = [];
       let index = 1;
       while (loadMore) {
-        const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
-        const data = await res.json();
+        try {
+          const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
+          const data = await res.json();
 
-        page = data.nextPageToken;
-        if (!page) loadMore = false;
+          page = data.nextPageToken;
+          if (!page) loadMore = false;
 
-        // Append new images and filter out non-image content, like videos
-        allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
+          // Append new images and filter out non-image content, like videos
+          allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
 
-        setItems(allItems);
+          setItems(allItems);
+        } catch (err) {
+          console.error(err);
+        }
+
         setProgress((index * 100) / album.mediaItemsCount);
-
         index++;
       }
 

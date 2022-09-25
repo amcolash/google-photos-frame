@@ -17,7 +17,8 @@ export function useSetting(optionName, client, defaultValue) {
       () =>
         fetch(`${SERVER}/settings/${client}/${optionName}`)
           .then((res) => res.json())
-          .then((data) => setOption(data[optionName])),
+          .then((data) => setOption(data[optionName]))
+          .catch((err) => console.error(err)),
       10 * 1000
     );
 
@@ -32,7 +33,7 @@ export function useSetting(optionName, client, defaultValue) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ [optionName]: option }),
-      });
+      }).catch((err) => console.error(err));
     }
 
     setFirstLoad(false);
