@@ -5,7 +5,7 @@ import { ReactComponent as Back } from './img/arrow-left.svg';
 import { ReactComponent as Crop } from './img/crop.svg';
 
 import { useSetting } from './hooks/useSetting';
-import { placeholder, SERVER, slideshowActive } from './util';
+import { logError, placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -64,7 +64,7 @@ export function Slideshow(props) {
         try {
           props.noSleep.enable();
         } catch (err) {
-          console.error(err);
+          logError(err);
         }
       }}
     >
@@ -116,7 +116,7 @@ export function Slideshow(props) {
             background: 'black',
           }}
           onError={(e) => {
-            console.error(e);
+            logError(e);
             setCurrent((current + 1) % props.items.length || 0);
           }}
         />

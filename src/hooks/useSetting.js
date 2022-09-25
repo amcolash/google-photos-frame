@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import equal from 'fast-deep-equal/es6';
 
-import { SERVER, setIntervalImmediately } from '../util';
+import { logError, SERVER, setIntervalImmediately } from '../util';
 import { usePrevious } from './usePrevious';
 import { useDebounce } from './useDebounce';
 
@@ -18,7 +18,7 @@ export function useSetting(optionName, client, defaultValue) {
         fetch(`${SERVER}/settings/${client}/${optionName}`)
           .then((res) => res.json())
           .then((data) => setOption(data[optionName]))
-          .catch((err) => console.error(err)),
+          .catch(logError),
       10 * 1000
     );
 
@@ -33,7 +33,7 @@ export function useSetting(optionName, client, defaultValue) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ [optionName]: option }),
-      }).catch((err) => console.error(err));
+      }).catch(logError);
     }
 
     setFirstLoad(false);

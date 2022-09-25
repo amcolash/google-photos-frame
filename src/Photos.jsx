@@ -8,7 +8,7 @@ import { ReactComponent as Back } from './img/arrow-left.svg';
 import { ReactComponent as Play } from './img/play.svg';
 
 import { Slideshow } from './Slideshow';
-import { colors, placeholder, SERVER, shuffle, slideshowActive } from './util';
+import { colors, logError, placeholder, SERVER, shuffle, slideshowActive } from './util';
 import { usePrevious } from './hooks/usePrevious';
 
 const noSleep = new NoSleep();
@@ -51,7 +51,7 @@ export function Photos(props) {
 
           setItems(allItems);
         } catch (err) {
-          console.error(err);
+          logError(err);
         }
 
         setProgress((index * 100) / album.mediaItemsCount);
@@ -83,7 +83,7 @@ export function Photos(props) {
       if (slideshowItems) noSleep.enable();
       else noSleep.disable();
     } catch (err) {
-      console.error(err);
+      logError(err);
     }
   }, [slideshowItems]);
 

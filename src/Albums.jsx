@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { ReactComponent as Logout } from './img/log-out.svg';
 
-import { placeholder, SERVER } from './util';
+import { logError, placeholder, SERVER } from './util';
 
 const HeaderLeft = (props) =>
   props.headerRef.current ? ReactDOM.createPortal(props.children, props.headerRef.current.querySelector('.left')) : null;
@@ -22,7 +22,7 @@ export function Albums(props) {
       .then((data) => {
         if (isMounted) setAlbums(data.albums);
       })
-      .catch((err) => console.error(err));
+      .catch(logError);
 
     return () => (isMounted = false);
   }, []);

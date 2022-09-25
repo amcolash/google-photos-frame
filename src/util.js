@@ -31,3 +31,8 @@ export function shuffle(array) {
 
   return array;
 }
+
+export function logError(err) {
+  if (console.error) console.error(e.message, e.stack);
+  else console.log(e);
+}
