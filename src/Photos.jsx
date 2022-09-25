@@ -130,7 +130,8 @@ export function Photos(props) {
 
 function PhotoList(props) {
   const coverId = props.album.coverPhotoMediaItemId;
-  const coverPhoto = (props.items.find((i) => i.id === coverId) || { baseUrl: props.album.coverPhotoBaseUrl }).baseUrl;
+  const found = props.items.find((i) => i.id === coverId);
+  const coverPhoto = found ? found.baseUrl : props.album.coverPhotoBaseUrl;
 
   return (
     <div className="photoList">
