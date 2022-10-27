@@ -1,5 +1,5 @@
-# Dependency Stage
-FROM mhart/alpine-node:16
+# Use node 16
+FROM node:16-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
