@@ -6,6 +6,7 @@ const { default: fetch } = require('node-fetch');
 const { NodeSSH } = require('node-ssh');
 const { join } = require('path');
 const ExifImage = require('exif').ExifImage;
+const CronJob = require('cron').CronJob;
 
 require('dotenv').config();
 
@@ -30,6 +31,9 @@ const cutoff = -4.5;
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 
+// Close Safari, Open Webclip, Touch to try and get wakelock working
+const restartCommand = 'killall -9 Web && sleep 5 && stouch touch 500 700 4 && sleep 15 && stouch touch 300 300 4';
+
 const ssh = new NodeSSH();
 
 // Keep ssh connection alive every minute
@@ -41,8 +45,8 @@ setIntervalImmediately(() => {
         username: 'mobile',
         password: process.env.IPAD_PASSWORD,
       })
-      .then(() => console.log('Connected to server'))
-      .catch((err) => console.error(`Error connecting to server\n${err}`));
+      .then(() => console.log('Connected to iPad'))
+      .catch((err) => console.error(`Error connecting to iPad\n${err}`));
 }, 60 * 1000);
 
 // Clear the cache every 15 minutes
@@ -55,6 +59,18 @@ setInterval(checkAmbientLight, 20 * 1000);
 
 // check on first load
 setTimeout(checkAmbientLight, 6 * 1000);
+
+// Restart Safari at 4am
+new CronJob(
+  '0 4 * * *',
+  async function () {
+    console.log('Scheduled restart of Safari');
+    await ssh.execCommand(restartCommand);
+  },
+  null,
+  true,
+  'America/Los_Angeles'
+);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
