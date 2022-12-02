@@ -32,7 +32,7 @@ const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 
 // Close Safari, Open Webclip, Touch to try and get wakelock working
-const restartCommand = 'killall -9 Web && sleep 5 && stouch touch 500 700 4 && sleep 15 && stouch touch 300 300 4';
+const restartCommand = 'killall -9 Web && sleep 10 && stouch touch 500 700 4 && sleep 15 && stouch touch 300 300 4';
 
 const ssh = new NodeSSH();
 
@@ -71,6 +71,9 @@ new CronJob(
   true,
   'America/Los_Angeles'
 );
+
+// Restart Safari on server restart
+setTimeout(() => ssh.execCommand(restartCommand), 10 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
