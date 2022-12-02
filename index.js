@@ -31,8 +31,8 @@ const cutoff = -4.5;
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 
-// Close Safari, Open Webclip, Touch to try and get wakelock working
-const restartCommand = 'killall -9 Web && sleep 10 && stouch touch 500 700 4 && sleep 15 && stouch touch 300 300 4';
+const restartScript = '/var/mobile/restart.sh';
+const restartCommand = `chmod +x ${restartScript} && ${restartScript}`;
 
 const ssh = new NodeSSH();
 
@@ -61,19 +61,13 @@ setInterval(checkAmbientLight, 20 * 1000);
 setTimeout(checkAmbientLight, 6 * 1000);
 
 // Restart Safari at 4am
-new CronJob(
-  '0 4 * * *',
-  async function () {
-    console.log('Scheduled restart of Safari');
-    await ssh.execCommand(restartCommand);
-  },
-  null,
-  true,
-  'America/Los_Angeles'
-);
+new CronJob('0 4 * * *', async () => await restart(), null, true, 'America/Los_Angeles');
 
 // Restart Safari on server restart
-setTimeout(() => ssh.execCommand(restartCommand), 10 * 1000);
+setTimeout(async () => {
+  await ssh.putFile(join(__dirname, 'restart.sh'), restartScript);
+  await restart();
+}, 10 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
@@ -233,6 +227,13 @@ app.get('/ipad', async (req, res) => {
 
 app.get('/status', (req, res) => res.send(status));
 
+app.post('/restart', async (req, res) => {
+  const result = await restart();
+
+  if (result.code === 0) res.sendStatus(200);
+  else res.sendStatus(500);
+});
+
 async function authAndCache(url, opts, res, skipCache) {
   if (!REFRESH_TOKEN) {
     res.send(401);
@@ -305,6 +306,15 @@ async function checkAmbientLight() {
   } catch (err) {
     console.error(err);
   }
+}
+
+async function restart() {
+  console.log(`[${new Date().toLocaleString()}]: Restart`);
+
+  const response = await ssh.execCommand(restartCommand);
+  console.log(`${response.stdout}${response.stderr}`);
+
+  return response;
 }
 
 // Seeded rng: https://stackoverflow.com/a/47593316/2303432

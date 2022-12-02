@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { ReactComponent as Clock } from './img/clock.svg';
+import { ReactComponent as Power } from './img/power.svg';
 import { ReactComponent as Zap } from './img/zap.svg';
 import { ReactComponent as ZapOff } from './img/zap-off.svg';
 
@@ -9,7 +10,7 @@ import { Albums } from './Albums';
 import { Photos } from './Photos';
 
 import { useSetting } from './hooks/useSetting';
-import { SERVER, colors } from './util';
+import { SERVER, colors, isIpad } from './util';
 
 export const App = () => {
   const [client, setClient] = useState('iPad');
@@ -44,7 +45,12 @@ export const App = () => {
           <div className="left" style={{ display: 'flex', alignItems: 'center' }} />
 
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', margin: '0 1.5em' }}>
+            {!isIpad() && (
+              <button onClick={() => fetch(`${SERVER}/restart`, { method: 'POST' })} style={{ padding: '0.45em', marginRight: '1.5em' }}>
+                <Power style={{ marginRight: 0 }} />
+              </button>
+            )}
+            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', marginRight: '1.5em' }}>
               <Clock style={{ marginRight: 0 }} />
             </button>
             <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '1.5em' }}>
