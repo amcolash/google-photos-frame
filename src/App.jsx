@@ -21,6 +21,7 @@ export const App = () => {
   const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
   const [ambientMode, setAmbientMode] = useSetting('ambient', client, true);
   const [serverTime, setServerTime, prevServerTime] = useSetting('serverTime', client);
+  const [restarting, setRestarting] = useState(false);
 
   useEffect(() => {
     if (prevServerTime !== undefined && serverTime !== prevServerTime) window.location.reload();
@@ -46,14 +47,30 @@ export const App = () => {
 
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!isIpad() && (
-              <button onClick={() => fetch(`${SERVER}/restart`, { method: 'POST' })} style={{ padding: '0.45em', marginRight: '1.5em' }}>
-                <Power style={{ marginRight: 0 }} />
+              <button
+                onClick={async () => {
+                  setRestarting(true);
+                  await fetch(`${SERVER}/restart`, { method: 'POST' });
+                  setRestarting(false);
+                }}
+                style={{ padding: '0.45em', marginRight: '1em' }}
+              >
+                {restarting ? (
+                  <div className="lds-ring">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                ) : (
+                  <Power style={{ marginRight: 0 }} />
+                )}
               </button>
             )}
-            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', marginRight: '1.5em' }}>
+            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', marginRight: '1em' }}>
               <Clock style={{ marginRight: 0 }} />
             </button>
-            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '1.5em' }}>
+            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '2em' }}>
               {ambientMode ? <Zap style={{ marginRight: 0 }} /> : <ZapOff style={{ marginRight: 0 }} />}
             </button>
             <div className="right" style={{ display: 'flex', alignItems: 'center' }} />
