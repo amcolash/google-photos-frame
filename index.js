@@ -60,8 +60,8 @@ setInterval(checkAmbientLight, 20 * 1000);
 // check on first load
 setTimeout(checkAmbientLight, 6 * 1000);
 
-// Restart Safari at 4am
-new CronJob('0 4 * * *', async () => await restart(), null, true, 'America/Los_Angeles');
+// Restart Safari every 8 hours
+new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
 
 // Restart Safari on server restart
 setTimeout(async () => {
