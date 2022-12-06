@@ -58,11 +58,8 @@ setInterval(() => {
 // Check brightness every 20 seconds
 setInterval(checkAmbientLight, 20 * 1000);
 
-// check on first load
-setTimeout(checkAmbientLight, 6 * 1000);
-
 // Check that Safari is running every 5 minutes
-setTimeout(() => setIntervalImmediately(start, 5 * 60 * 1000), 5000);
+setInterval(start, 5 * 60 * 1000);
 
 // Restart Safari every 8 hours
 new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
@@ -70,7 +67,7 @@ new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
 // Restart Safari on server restart
 setTimeout(async () => {
   await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
-  // await restart();
+  await restart();
 }, 10 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
