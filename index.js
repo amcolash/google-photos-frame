@@ -31,8 +31,9 @@ const cutoff = -4.5;
 const lockCommand = 'activator send libactivator.lockscreen.show';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 
-const restartScript = '/var/mobile/restart.sh';
-const restartCommand = `chmod +x ${restartScript} && ${restartScript}`;
+const restartScript = '/var/mobile/start.sh';
+const startCommand = `chmod +x ${restartScript} && ${restartScript}`;
+const restartCommand = `chmod +x ${restartScript} && ${restartScript} --restart`;
 
 const ssh = new NodeSSH();
 
@@ -60,13 +61,16 @@ setInterval(checkAmbientLight, 20 * 1000);
 // check on first load
 setTimeout(checkAmbientLight, 6 * 1000);
 
+// Check that Safari is running every 5 minutes
+setTimeout(() => setIntervalImmediately(start, 5 * 60 * 1000), 5000);
+
 // Restart Safari every 8 hours
 new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
 
 // Restart Safari on server restart
 setTimeout(async () => {
-  await ssh.putFile(join(__dirname, 'restart.sh'), restartScript);
-  await restart();
+  await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
+  // await restart();
 }, 10 * 1000);
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
@@ -306,6 +310,15 @@ async function checkAmbientLight() {
   } catch (err) {
     console.error(err);
   }
+}
+
+async function start() {
+  console.log(`[${new Date().toLocaleString()}]: Start`);
+
+  const response = await ssh.execCommand(startCommand);
+  console.log(`${response.stdout}${response.stderr}`);
+
+  return response;
 }
 
 async function restart() {
