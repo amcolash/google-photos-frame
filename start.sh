@@ -31,12 +31,14 @@ function start() {
   stouch touch 300 300 4
 }
 
+runningApp=$(activator current-app)
+
 # Only stop safari when "--restart" passed
 if [[ $1 == '--restart' ]]; then
   stopSafari
   stopOther
   start
-elif [[ $(activator current-app) != "com.apple.webapp" ]]; then
+elif [[ $runningApp != "com.apple.webapp" ]]; then
   # Otherwise, just start things if they are not running
   stopOther
   start
