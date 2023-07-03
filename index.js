@@ -28,7 +28,7 @@ let CACHE = {};
 const status = { locked: undefined, brightness: undefined };
 const cutoff = -4.5;
 
-const lockCommand = 'activator send libactivator.lockscreen.show';
+const lockCommand = 'activator send libactivator.system.sleepbutton';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 
 const restartScript = '/var/mobile/start.sh';
