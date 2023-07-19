@@ -36,7 +36,7 @@ export const App = () => {
             display: 'flex',
             justifyContent: 'space-between',
             padding: '1.25em',
-            background: colors.border,
+            background: colors.dim,
             zIndex: 1,
             position: 'relative',
             transition: 'opacity 0.5s',

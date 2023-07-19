@@ -8,7 +8,7 @@ import { ReactComponent as Back } from './img/arrow-left.svg';
 import { ReactComponent as Play } from './img/play.svg';
 
 import { Slideshow } from './Slideshow';
-import { colors, logError, placeholder, SERVER, shuffle, slideshowActive } from './util';
+import { colors, isIpad, logError, placeholder, SERVER, shuffle, slideshowActive } from './util';
 import { usePrevious } from './hooks/usePrevious';
 
 const noSleep = new NoSleep();
@@ -152,6 +152,7 @@ function PhotoList(props) {
               localStorage.setItem(slideshowActive, true);
             }}
             disabled={props.progress < 1}
+            style={isIpad() ? { color: colors.light } : undefined}
           >
             <Play />
             Slideshow

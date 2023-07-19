@@ -5,8 +5,9 @@ export const slideshowActive = 'photo-frame-slideshow';
 
 export const colors = {
   theme: '#5e9626',
-  background: '#f5f5f5',
-  border: '#333',
+  light: '#f5f5f5',
+  dim: '#333',
+  dark: '#171717',
 };
 
 export function setIntervalImmediately(func, interval) {
