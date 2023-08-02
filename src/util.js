@@ -1,5 +1,5 @@
 const PORT = 8500;
-export const SERVER = import.meta.env.PROD ? `http://192.168.1.101:${PORT}` : `http://localhost:${PORT}`;
+export const SERVER = import.meta.env.PROD ? `https://home.amcolash.com:${PORT}` : `http://localhost:${PORT}`;
 export const placeholder = false;
 export const slideshowActive = 'photo-frame-slideshow';
 
