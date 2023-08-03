@@ -263,9 +263,8 @@ app.get('/crop/:id', async (req, res) => {
 
     const verts = result.cropHintsAnnotation.cropHints[0].boundingPoly.vertices;
     const topLeft = verts[0];
-    const bottomRight = verts[2];
 
-    const cropHints = { top: topLeft.y, left: topLeft.x, width: bottomRight.x - topLeft.x, height: bottomRight.y - topLeft.y };
+    const cropHints = { top: topLeft.y };
     cropCache[id] = cropHints;
 
     nconf.set('cropCache', cropCache);

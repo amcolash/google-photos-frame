@@ -5,7 +5,7 @@ import { ReactComponent as Back } from './img/arrow-left.svg';
 import { ReactComponent as Crop } from './img/crop.svg';
 
 import { useSetting } from './hooks/useSetting';
-import { logError, placeholder, SERVER, slideshowActive } from './util';
+import { isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -49,16 +49,19 @@ export function Slideshow(props) {
 
     // Preload the next image + crop bounds to try and prevent errors
     clearTimeout(loadTimer);
-    loadTimer = setTimeout(() => {
-      const next = props.items[(current + 1) % props.items.length];
+    loadTimer = setTimeout(
+      () => {
+        const next = props.items[(current + 1) % props.items.length];
 
-      if (next) {
-        const nextImg = new Image();
-        nextImg.src = placeholder ? `${SERVER}/image?size=1200&id=${next.id}` : `${next.baseUrl}=s1200-c`;
+        if (next) {
+          const nextImg = new Image();
+          nextImg.src = placeholder ? `${SERVER}/image?size=1200&id=${next.id}` : `${next.baseUrl}=s1200-c`;
 
-        fetchCrop(next);
-      }
-    }, 5000);
+          fetchCrop(next);
+        }
+      },
+      isIpad() ? 3000 : 1000
+    );
   }, [current, props.items, fetchCrop]);
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export function Slideshow(props) {
 
   useEffect(() => {
     if (props.headerRef.current) {
-      props.headerRef.current.style.opacity = overlay ? 1 : 0;
+      props.headerRef.current.style.opacity = overlay ? 0.85 : 0;
       props.headerRef.current.style.pointerEvents = overlay ? 'unset' : 'none';
     }
   }, [overlay, props.headerRef]);
@@ -83,15 +86,11 @@ export function Slideshow(props) {
 
   let cropCenter;
   if (crop && cropBounds[photo.id]) {
-    // Calculate the center of the crop bounds as a percentage of the image size
-    const { top, left, width, height } = cropBounds[photo.id];
+    // 4:3 ratio crop size always used, so height is always the same
+    const height = 1200 * (4 / 3);
 
-    const scale = 1200 / Math.max(photo.width, photo.height);
-    const scaledWidth = photo.width * scale;
-    const scaledHeight = photo.height * scale;
     cropCenter = {
-      x: ((left + width / 2) / scaledWidth) * 100,
-      y: ((top + height / 2) / scaledHeight) * 100,
+      y: ((cropBounds[photo.id].top + height / 2) / height) * 100,
     };
   }
 
@@ -151,7 +150,7 @@ export function Slideshow(props) {
             background: 'black',
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: crop ? 'cover' : 'contain',
-            backgroundPosition: cropCenter ? `left ${cropCenter.x}% top ${cropCenter.y}%` : 'center',
+            backgroundPosition: cropCenter ? `center top ${cropCenter.y}%` : 'center',
             backgroundRepeat: 'no-repeat',
           }}
           // onError={(e) => {
