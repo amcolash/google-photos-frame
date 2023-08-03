@@ -7,6 +7,8 @@ const { NodeSSH } = require('node-ssh');
 const { join } = require('path');
 const ExifImage = require('exif').ExifImage;
 const CronJob = require('cron').CronJob;
+const vision = require('@google-cloud/vision');
+const { existsSync } = require('fs');
 
 require('dotenv').config();
 
@@ -14,8 +16,12 @@ nconf.use('file', { file: './settings.json' });
 nconf.load();
 nconf.save();
 
+const IS_DOCKER = existsSync('/.dockerenv');
+const SSH_ENABLE = false;
+
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
+let cropCache = nconf.get('cropCache') || {};
 
 // Update server time for each client
 Object.values(settings).forEach((s) => (s.serverTime = Date.now()));
@@ -37,41 +43,44 @@ const restartCommand = `chmod +x ${restartScript} && ${restartScript} --restart`
 
 const ssh = new NodeSSH();
 
-// Keep ssh connection alive every minute
-setIntervalImmediately(() => {
-  if (!ssh.isConnected())
-    ssh
-      .connect({
-        host: process.env.IPAD_IP,
-        username: 'mobile',
-        password: process.env.IPAD_PASSWORD,
-      })
-      .then(() => console.log('Connected to iPad'))
-      .catch((err) => console.error(`Error connecting to iPad\n${err}`));
-}, 60 * 1000);
+if (SSH_ENABLE || IS_DOCKER) {
+  // Keep ssh connection alive every minute
+  setIntervalImmediately(() => {
+    if (!ssh.isConnected())
+      ssh
+        .connect({
+          host: process.env.IPAD_IP,
+          username: 'mobile',
+          password: process.env.IPAD_PASSWORD,
+        })
+        .then(() => console.log('Connected to iPad'))
+        .catch((err) => console.error(`Error connecting to iPad\n${err}`));
+  }, 60 * 1000);
+
+  // Check brightness every 20 seconds
+  setInterval(checkAmbientLight, 20 * 1000);
+
+  // Check that Safari is running every 5 minutes
+  setInterval(start, 5 * 60 * 1000);
+
+  // Restart Safari every 8 hours
+  new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
+
+  // Restart Safari on server restart
+  setTimeout(async () => {
+    await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
+    await restart();
+  }, 10 * 1000);
+}
 
 // Clear the cache every 15 minutes
 setInterval(() => {
   CACHE = {};
 }, 15 * 60 * 1000);
 
-// Check brightness every 20 seconds
-setInterval(checkAmbientLight, 20 * 1000);
-
-// Check that Safari is running every 5 minutes
-setInterval(start, 5 * 60 * 1000);
-
-// Restart Safari every 8 hours
-new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
-
-// Restart Safari on server restart
-setTimeout(async () => {
-  await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
-  await restart();
-}, 10 * 1000);
-
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+const visionClient = new vision.ImageAnnotatorClient({ authClient: oauth2Client });
 
 const mockedIds = new Set();
 while (mockedIds.size < 50) mockedIds.add(Math.floor(Math.random() * 1000));
@@ -125,7 +134,7 @@ app.get('/oauth', async (req, res) => {
     CACHE = {};
   } else {
     // Generate a redirect url to authenticate user
-    const scopes = ['https://www.googleapis.com/auth/photoslibrary.readonly'];
+    const scopes = ['https://www.googleapis.com/auth/photoslibrary.readonly', 'https://www.googleapis.com/auth/cloud-vision'];
 
     const url = oauth2Client.generateAuthUrl({
       access_type: 'offline', // access + prompt forces a new refresh token
@@ -235,6 +244,40 @@ app.post('/restart', async (req, res) => {
   else res.sendStatus(500);
 });
 
+app.get('/crop/:id', async (req, res) => {
+  const id = req.params.id;
+  const url = req.query.url;
+
+  try {
+    if (cropCache[id]) {
+      res.send(cropCache[id]);
+      return;
+    }
+
+    const data = await fetch(url + '=s1200-c').then((res) => res.buffer());
+
+    const [result] = await visionClient.cropHints({
+      image: { content: data },
+      imageContext: { cropHintsParams: { aspectRatios: ['1.33'] } },
+    });
+
+    const verts = result.cropHintsAnnotation.cropHints[0].boundingPoly.vertices;
+    const topLeft = verts[0];
+    const bottomRight = verts[2];
+
+    const cropHints = { top: topLeft.y, left: topLeft.x, width: bottomRight.x - topLeft.x, height: bottomRight.y - topLeft.y };
+    cropCache[id] = cropHints;
+
+    nconf.set('cropCache', cropCache);
+    nconf.save();
+
+    res.send(cropHints);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+});
+
 async function authAndCache(url, opts, res, skipCache) {
   if (!REFRESH_TOKEN) {
     res.send(401);
@@ -259,7 +302,13 @@ async function authAndCache(url, opts, res, skipCache) {
 
     if (url.indexOf('mediaItems:search') !== -1) {
       (json.mediaItems || []).forEach((m, i) => {
-        json.mediaItems[i] = { baseUrl: m.baseUrl, id: m.id, mimeType: m.mimeType };
+        json.mediaItems[i] = {
+          baseUrl: m.baseUrl,
+          id: m.id,
+          mimeType: m.mimeType,
+          width: Number.parseInt(m.mediaMetadata.width),
+          height: Number.parseInt(m.mediaMetadata.height),
+        };
       });
     }
 
