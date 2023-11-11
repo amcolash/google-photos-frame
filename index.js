@@ -68,7 +68,7 @@ if (SSH_ENABLE || IS_DOCKER) {
 
   // Restart Safari on server restart
   setTimeout(async () => {
-    await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
+    if (ssh.isConnected()) await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
     await restart();
   }, 10 * 1000);
 }
@@ -367,6 +367,8 @@ async function start() {
 }
 
 async function restart() {
+  if (!ssh.isConnected()) return 'Not connected';
+
   console.log(`[${new Date().toLocaleString()}]: Restart`);
 
   const response = await ssh.execCommand(restartCommand);

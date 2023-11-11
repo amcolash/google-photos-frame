@@ -31,7 +31,9 @@ export function Slideshow(props) {
         await fetch(`${SERVER}/crop/${item.id}?url=${item.baseUrl}`)
           .then((res) => res.json())
           .then((data) => {
-            setCropBounds({ ...cropBounds, [item.id]: data });
+            setCropBounds((prev) => {
+              return { ...prev, [item.id]: data };
+            });
           })
           .catch((err) => logError(err));
       }
@@ -41,8 +43,8 @@ export function Slideshow(props) {
 
   useEffect(() => {
     clearTimeout(shuffleTimer);
-    shuffleTimer = setTimeout(() => setCurrent(((current || 0) + 1) % props.items.length), duration * 1000);
-  }, [current, duration, props.items]);
+    shuffleTimer = setTimeout(() => setCurrent((prev) => (prev + 1) % props.items.length), duration * 1000);
+  }, [duration]);
 
   useEffect(() => {
     fetchCrop(props.items[current]);
@@ -67,7 +69,7 @@ export function Slideshow(props) {
   useEffect(() => {
     clearTimeout(overlayTimer);
     overlayTimer = setTimeout(() => setOverlay(false), 5000);
-  }, [duration, overlay, setOverlay]);
+  }, [overlay]);
 
   useEffect(() => {
     if (props.headerRef.current) {
