@@ -24,13 +24,21 @@ function stopOther() {
 
 function start() {
   echo "Starting Slideshow"
-  stouch touch 500 700 4
+  stouch touch 512 700 4
   sleep 15
 
   echo "Enabling Wakelock"
   stouch touch 300 300 4
 }
 
+# If locked, unlock before starting
+currentMode=$(activator current-mode)
+if [[ $currentMode == "lockscreen" ]]; then
+  activator send libactivator.lockscreen.dismiss
+  sleep 3
+fi
+
+# Determine the current app running
 runningApp=$(activator current-app)
 
 # Only stop safari when "--restart" passed

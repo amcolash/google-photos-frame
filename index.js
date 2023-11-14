@@ -17,7 +17,7 @@ nconf.load();
 nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
-const SSH_ENABLE = false;
+const SSH_ENABLE = true;
 
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
@@ -31,11 +31,12 @@ const port = process.env.PORT || 8500;
 const clientUrl = `http://192.168.1.101:${port}`;
 let CACHE = {};
 
-const status = { locked: undefined, brightness: undefined };
+const status = { mode: undefined, brightness: undefined };
 const cutoff = -4.5;
 
 const lockCommand = 'activator send libactivator.system.sleepbutton';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
+const getModeCommand = 'activator current-mode';
 
 const restartScript = '/var/mobile/start.sh';
 const startCommand = `chmod +x ${restartScript} && ${restartScript}`;
@@ -320,13 +321,10 @@ async function authAndCache(url, opts, res, skipCache) {
 }
 
 async function checkAmbientLight() {
-  if (!settings.iPad.ambient) return;
+  if (!settings.iPad.ambient || !ssh.isConnected()) return;
 
   try {
-    if (status.locked === undefined) {
-      await ssh.execCommand(unlockCommand);
-      status.locked = false;
-    }
+    status.mode = (await ssh.execCommand(getModeCommand)).stdout; // springboard, application, lockscreen
 
     const remoteFile = '/User/ambient.jpg';
     const localFile = join(__dirname, 'ambient.jpg');
@@ -343,14 +341,8 @@ async function checkAmbientLight() {
       status.brightness = exifData.exif.BrightnessValue;
       console.log(`Ambient light level: ${status.brightness.toFixed(4)}`);
 
-      if (status.brightness > cutoff && status.locked) {
-        status.locked = false;
-        await ssh.execCommand(unlockCommand);
-      }
-      if (status.brightness <= cutoff && !status.locked) {
-        status.locked = true;
-        await ssh.execCommand(lockCommand);
-      }
+      if (status.brightness > cutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
+      if (status.brightness <= cutoff && status.mode === 'application') await ssh.execCommand(lockCommand);
     });
   } catch (err) {
     console.error(err);
@@ -358,6 +350,8 @@ async function checkAmbientLight() {
 }
 
 async function start() {
+  if (!ssh.isConnected()) return 'Not connected';
+
   console.log(`[${new Date().toLocaleString()}]: Start`);
 
   const response = await ssh.execCommand(startCommand);

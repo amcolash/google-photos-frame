@@ -1,58 +1,41 @@
 # google-photos-frame
 
-A web app to show google photos from an album on a photo frame
+A web app to show google photos from an album on a photo frame.
+Scaffolded by `nano-react-app`.
 
-## Nano React App Default Javascript Template
+## Setting up an iPad Mini (iOS 9.3.5)
 
-The default template project for [nano-react-app](https://github.com/nano-react-app/nano-react-app).
+### Jailbreak
 
-- `npm start` — This will spawn a development server with a default port of `5173`.
-- `npm run build` — This will output a production build in the `dist` directory.
+- Install [sideloadly](https://sideloadly.io/)
+- Sideload and run [blizzard](https://github.com/GeoSn0w/Blizzard-Jailbreak-9/releases)
 
-## Custom port
+### Settings
 
-You can use the `-p` flag to specify a port for development. To do this, you can either run `npm start` with an additional flag:
+- Turn off auto-lock
+- Turn off lock code
+- Install [Let's Encrypt Certs](https://cydia.invoxiplaygames.uk/certificates/)
 
-```
-npm start -- --port 3000
-```
+### Manual Steps [Via SSH]
 
-Or edit the `start` script directly:
+- Ensure there are 3 apps in the dock - Safari, PhotoFrame, Settings
+- Regain storage by moving `/System/Library/LinguisticData` to `/var/stash/`: [steps](https://www.reddit.com/r/jailbreak/comments/5xtdt6/tutorial_discussion_solve_and_fix_100_full_system/)
+- Change passwords from `alpine`
 
-```
-vite --port 3000
-```
+### Install Jailbreak Tweaks
 
-## Adding styles
+#### Required
 
-You can use CSS files with simple ES2015 `import` statements anywhere in your Javascript:
+- [App Sync Unified](http://cydia.akemi.ai)
+- [ReProvision Reborn](https://repo.satoh.dev)
+- SimulateTouch
+- Activator
+- camshot
+- OpenSSH
 
-```js
-import './index.css';
-```
+#### Optional
 
-## Babel transforms
-
-The Babel preset [babel-preset-nano-react-app](https://github.com/nano-react-app/babel-preset-nano-react-app) is used to support the same transforms that Create React App supports.
-
-The Babel configuration lives inside `package.json` and will override an external `.babelrc` file, so if you want to use `.babelrc` remember to delete the `babel` property inside `package.json`.
-
-## Deploy to GitHub Pages
-
-You can also deploy your project using GitHub pages.
-First install the `gh-pages` [package](https://github.com/tschaub/gh-pages):
-
-`npm i -D gh-pages`
-
-Use the following scripts for deployment:
-
-```js
-"scripts": {
-  "start": "vite",
-  "build": "vite build",
-  "predeploy": "rm -rf dist && vite build",
-  "deploy": "gh-pages -d dist"
-},
-```
-
-Then follow the normal procedure in GitHub Pages and select the `gh-pages` branch.
+- BarFade (Fade on Apps+Hide Bar on Most Apps)
+- Veency
+- illLookLater (Remember to Enable + All Apps)
+- vim

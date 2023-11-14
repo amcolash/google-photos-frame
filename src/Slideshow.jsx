@@ -44,7 +44,7 @@ export function Slideshow(props) {
   useEffect(() => {
     clearTimeout(shuffleTimer);
     shuffleTimer = setTimeout(() => setCurrent((prev) => (prev + 1) % props.items.length), duration * 1000);
-  }, [duration]);
+  }, [duration, current, props.items]);
 
   useEffect(() => {
     fetchCrop(props.items[current]);
