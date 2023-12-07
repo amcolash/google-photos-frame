@@ -3,12 +3,11 @@ import svgr from 'vite-plugin-svgr';
 
 export default {
   build: {
-    target: 'es2015',
     sourcemap: true,
   },
   plugins: [
     legacy({
-      targets: 'Safari 9',
+      targets: ['Safari 9', 'es2015'],
     }),
     svgr(),
   ],

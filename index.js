@@ -68,11 +68,16 @@ if (SSH_ENABLE || IS_DOCKER) {
   // Restart Safari every 8 hours
   new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
 
-  // Check for ping every 10 seconds
+  // Check for ping every 10 seconds and restart if no ping in 60 seconds (only when application is running)
   setInterval(() => {
     if (Date.now() - lastPing > 60 * 1000 && ssh.isConnected()) {
-      console.log('No ping in 60 seconds, restarting Safari');
-      restart();
+      // status.mode is updated from checking ambient light
+      if (status.mode === 'application') {
+        console.log('No ping in 60 seconds, restarting Safari');
+        restart();
+      } else {
+        lastPing = Date.now(); // reset ping time when not running application
+      }
     }
   }, 10 * 1000);
 
