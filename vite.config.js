@@ -7,7 +7,7 @@ export default {
   },
   plugins: [
     legacy({
-      targets: ['Safari 9', 'es2015'],
+      targets: ['Safari 9'],
     }),
     svgr(),
   ],
