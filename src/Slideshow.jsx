@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ReactComponent as Back } from './img/arrow-left.svg';
-import { ReactComponent as Crop } from './img/crop.svg';
+import Back from './img/arrow-left.svg?react';
+import Crop from './img/crop.svg?react';
 
 import { useSetting } from './hooks/useSetting';
 import { isIpad, logError, placeholder, SERVER, slideshowActive } from './util';

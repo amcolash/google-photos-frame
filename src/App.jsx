@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
-import { ReactComponent as Clock } from './img/clock.svg';
-import { ReactComponent as Power } from './img/power.svg';
-import { ReactComponent as Zap } from './img/zap.svg';
-import { ReactComponent as ZapOff } from './img/zap-off.svg';
+import Clock from './img/clock.svg?react';
+import Power from './img/power.svg?react';
+import Zap from './img/zap.svg?react';
+import ZapOff from './img/zap-off.svg?react';
 
 import { Albums } from './Albums';
 import { Photos } from './Photos';

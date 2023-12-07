@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ReactComponent as Logout } from './img/log-out.svg';
+import Logout from './img/log-out.svg?react';
 
 import { logError, placeholder, SERVER } from './util';
 

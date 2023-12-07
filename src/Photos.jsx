@@ -4,8 +4,8 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import NoSleep from 'nosleep.js';
 import equal from 'fast-deep-equal/es6';
 
-import { ReactComponent as Back } from './img/arrow-left.svg';
-import { ReactComponent as Play } from './img/play.svg';
+import Back from './img/arrow-left.svg?react';
+import Play from './img/play.svg?react';
 
 import { Slideshow } from './Slideshow';
 import { colors, isIpad, logError, placeholder, SERVER, shuffle, slideshowActive } from './util';
