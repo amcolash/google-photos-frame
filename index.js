@@ -22,6 +22,7 @@ const SSH_ENABLE = true;
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
 let cropCache = nconf.get('cropCache') || {};
+let lastPing = Date.now() + 60 * 1000;
 
 // Update server time for each client
 Object.values(settings).forEach((s) => (s.serverTime = Date.now()));
@@ -66,6 +67,14 @@ if (SSH_ENABLE || IS_DOCKER) {
 
   // Restart Safari every 8 hours
   new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
+
+  // Check for ping every 10 seconds
+  setInterval(() => {
+    if (Date.now() - lastPing > 60 * 1000 && ssh.isConnected()) {
+      console.log('No ping in 60 seconds, restarting Safari');
+      restart();
+    }
+  }, 10 * 1000);
 
   // Restart Safari on server restart
   setTimeout(async () => {
@@ -192,6 +201,8 @@ app.get('/image', (req, res) => {
 
 app.get('/settings/:client/:option', (req, res) => {
   const { client, option } = req.params;
+
+  lastPing = Date.now();
 
   if (option === 'login') {
     res.send({ login: REFRESH_TOKEN !== undefined || mockResponse });
@@ -354,6 +365,7 @@ async function start() {
 
   console.log(`[${new Date().toLocaleString()}]: Start`);
 
+  lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(startCommand);
   console.log(`${response.stdout}${response.stderr}`);
 
@@ -365,6 +377,7 @@ async function restart() {
 
   console.log(`[${new Date().toLocaleString()}]: Restart`);
 
+  lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(restartCommand);
   console.log(`${response.stdout}${response.stderr}`);
 
