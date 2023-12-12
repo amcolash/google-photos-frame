@@ -65,8 +65,8 @@ if (SSH_ENABLE || IS_DOCKER) {
   // Check that Safari is running every 5 minutes
   setInterval(start, 5 * 60 * 1000);
 
-  // Restart Safari every 8 hours
-  new CronJob('0 0/8 * * *', restart, null, true, 'America/Los_Angeles');
+  // Restart Safari at 5am daily
+  new CronJob('0 5 * * *', restart, null, true, 'America/Los_Angeles');
 
   // Check for ping every 10 seconds and restart if no ping in 60 seconds (only when application is running)
   setInterval(() => {
