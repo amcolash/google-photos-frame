@@ -74,10 +74,7 @@ export function Slideshow(props) {
   }, [overlay]);
 
   useEffect(() => {
-    if (props.headerRef.current) {
-      props.headerRef.current.style.opacity = overlay ? 0.85 : 0;
-      props.headerRef.current.style.pointerEvents = overlay ? 'unset' : 'none';
-    }
+    if (props.headerRef.current) props.headerRef.current.style.opacity = overlay ? 0.85 : 0;
   }, [overlay, props.headerRef]);
 
   const photo = props.items[current] || {};
@@ -102,12 +99,14 @@ export function Slideshow(props) {
 
   return (
     <div
-      onClick={() => {
-        setOverlay(true);
-        try {
-          props.noSleep.enable();
-        } catch (err) {
-          logError(err);
+      onClick={(e) => {
+        if (!overlay) {
+          setOverlay(true);
+          try {
+            props.noSleep.enable();
+          } catch (err) {
+            logError(err);
+          }
         }
       }}
     >
