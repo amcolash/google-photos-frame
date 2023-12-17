@@ -141,7 +141,7 @@ function PhotoList(props) {
 
   return (
     <div className="photoList">
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div className="flex align-center">
         <img src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : coverPhoto} style={{ marginRight: '1em' }} />
         <div>
           <h2 style={{ marginTop: 0 }}>

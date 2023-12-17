@@ -115,7 +115,7 @@ export function Slideshow(props) {
         <h2 style={{ margin: 0 }}>{props.title} Slideshow</h2>
       </HeaderLeft>
       <HeaderRight headerRef={props.headerRef}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="flex align-center">
           <button onClick={() => setCrop(!crop)} style={{ marginRight: '1.5em' }}>
             <Crop /> {crop ? '✓' : 'x'}
           </button>

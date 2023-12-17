@@ -31,10 +31,8 @@ export const App = () => {
     return (
       <div>
         <div
-          className="inverse header"
+          className="inverse header flex justify-space-between"
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
             padding: '1.25em',
             background: colors.dim,
             zIndex: 1,
@@ -43,9 +41,9 @@ export const App = () => {
           }}
           ref={headerRef}
         >
-          <div className="left" style={{ display: 'flex', alignItems: 'center' }} />
+          <div className="left flex align-center" />
 
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex align-center">
             {!isIpad() && (
               <button
                 onClick={async () => {
@@ -73,7 +71,7 @@ export const App = () => {
             <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '2em' }}>
               {ambientMode ? <Zap style={{ marginRight: 0 }} /> : <ZapOff style={{ marginRight: 0 }} />}
             </button>
-            <div className="right" style={{ display: 'flex', alignItems: 'center' }} />
+            <div className="right flex align-center" />
           </div>
         </div>
 
@@ -87,7 +85,7 @@ export const App = () => {
     );
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh' }}>
+    <div className="flex align-center justify-center" style={{ width: '100vw', height: '100vh' }}>
       <div style={{ textAlign: 'center' }}>
         <h2>Photo Frame</h2>
         {loggedIn === false && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12em' }} />}
