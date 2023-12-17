@@ -33,7 +33,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^5.2.0",
+    "autoprefixer": "^10.4.16",
     "babel-preset-nano-react-app": "^0.1.0",
+    "postcss": "^8.4.32",
     "vite": "^5.0.6"
   },
   "overrides": {
@@ -43,5 +45,9 @@
     "presets": [
       "nano-react-app"
     ]
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "iOS 8"
+  ]
 }

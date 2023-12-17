@@ -50,7 +50,11 @@ export function Albums(props) {
         .map((a) => (
           <div className="album" key={a.id} onClick={() => props.setSelectedAlbum(a)}>
             <img
-              src={placeholder ? `${SERVER}/image?size=96&id=${a.id}` : `${a.coverPhotoBaseUrl}=s96-c`}
+              src={
+                placeholder
+                  ? `${SERVER}/image?size=96&id=${a.id}`
+                  : `${SERVER}/image/${a.id}?subdir=album_sm&url=${encodeURIComponent(`${a.coverPhotoBaseUrl}=s96-c`)}`
+              }
               style={{ marginRight: '0.5em' }}
             />
             <div>{a.title}</div>

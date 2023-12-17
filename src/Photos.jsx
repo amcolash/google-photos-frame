@@ -135,12 +135,14 @@ export function Photos(props) {
 function PhotoList(props) {
   const coverId = props.album.coverPhotoMediaItemId;
   const found = props.items.find((i) => i.id === coverId);
-  const coverPhoto = found ? found.baseUrl : props.album.coverPhotoBaseUrl;
+  const coverPhoto = `${SERVER}/image/${props.album.id}?subdir=album_lg&url=${encodeURIComponent(
+    (found ? found.baseUrl : props.album.coverPhotoBaseUrl) + '=s128-c'
+  )}`;
 
   return (
     <div className="photoList">
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : `${coverPhoto}=s128-c`} style={{ marginRight: '1em' }} />
+        <img src={placeholder ? `${SERVER}/image?size=128&id=${props.album.id}` : coverPhoto} style={{ marginRight: '1em' }} />
         <div>
           <h2 style={{ marginTop: 0 }}>
             {props.items.length} photos in "{props.album.title}"
@@ -181,7 +183,11 @@ function PhotoList(props) {
           >
             <LazyLoadImage
               className="photo"
-              src={placeholder ? `${SERVER}/image?size=64&id=${i.id}` : `${i.baseUrl}=s64-c`}
+              src={
+                placeholder
+                  ? `${SERVER}/image?size=64&id=${i.id}`
+                  : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
+              }
               threshold={1000}
             />
           </button>

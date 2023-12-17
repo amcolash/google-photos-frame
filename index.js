@@ -4,11 +4,12 @@ const { google } = require('googleapis');
 const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
 const { NodeSSH } = require('node-ssh');
-const { join } = require('path');
+const { join, basename } = require('path');
 const ExifImage = require('exif').ExifImage;
 const CronJob = require('cron').CronJob;
 const vision = require('@google-cloud/vision');
-const { existsSync } = require('fs');
+const { existsSync, writeFileSync, readFileSync, mkdirSync } = require('fs');
+const { readFile } = require('fs/promises');
 
 require('dotenv').config();
 
@@ -18,6 +19,11 @@ nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
 const SSH_ENABLE = true;
+
+const imageCache = join(__dirname, 'tmp/');
+['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
+  if (!existsSync(join(imageCache, f))) mkdirSync(join(imageCache, f), { recursive: true });
+});
 
 let REFRESH_TOKEN = nconf.get('refresh_token');
 let settings = nconf.get('settings') || { iPad: { duration: 60 } };
@@ -187,8 +193,8 @@ app.get('/album/:id/:page?', async (req, res) => {
       albumId: req.params.id,
       pageToken: req.params.page,
     },
-    res,
-    true // for now, always skip cache since we will always need new base photos
+    res
+    // true // for now, always skip cache since we will always need new base photos
   );
 });
 
@@ -202,6 +208,27 @@ app.get('/image', (req, res) => {
   res.send(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="${color}"/></svg>`
   );
+});
+
+app.get('/image/:id', async (req, res) => {
+  const id = req.params.id;
+  const url = req.query.url;
+  const subdir = req.query.subdir?.toString() || '';
+
+  const file = join(imageCache, subdir, id + '.jpg');
+
+  if (existsSync(file)) {
+    console.log('Using cached image', id);
+    const image = readFileSync(file);
+    res.send(image);
+  } else {
+    console.log('Fetching image', id, file);
+    const data = await fetch(url);
+    const image = await data.buffer();
+    writeFileSync(file, image);
+
+    res.send(image);
+  }
 });
 
 app.get('/settings/:client/:option', (req, res) => {
@@ -300,15 +327,14 @@ async function authAndCache(url, opts, res, skipCache) {
     return;
   }
 
-  const access_token = (await oauth2Client.getAccessToken()).token;
   const key = url + (opts ? JSON.stringify(opts) : '');
-
   if (CACHE[key] && !skipCache) {
     res.send(CACHE[key]);
     return;
   }
 
   try {
+    const access_token = (await oauth2Client.getAccessToken()).token;
     const data = await fetch(url, {
       method: opts ? 'POST' : 'GET',
       headers: { Authorization: `Bearer ${access_token}` },

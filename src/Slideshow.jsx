@@ -57,7 +57,9 @@ export function Slideshow(props) {
 
         if (next) {
           const nextImg = new Image();
-          nextImg.src = placeholder ? `${SERVER}/image?size=1200&id=${next.id}` : `${next.baseUrl}=s1200-c`;
+          nextImg.src = placeholder
+            ? `${SERVER}/image?size=1200&id=${next.id}`
+            : `${SERVER}/image/${next.id}?subdir=image&url=${encodeURIComponent(`${next.baseUrl}=s1200-c`)}`;
 
           fetchCrop(next);
         }
@@ -79,7 +81,9 @@ export function Slideshow(props) {
   }, [overlay, props.headerRef]);
 
   const photo = props.items[current] || {};
-  const imageUrl = placeholder ? `${SERVER}/image?size=1200&id=${photo.id}` : `${photo.baseUrl}=s1200-c`;
+  const imageUrl = placeholder
+    ? `${SERVER}/image?size=1200&id=${photo.id}`
+    : `${SERVER}/image/${photo.id}?subdir=image&url=${encodeURIComponent(`${photo.baseUrl}=s1200-c`)}`;
 
   const min = Math.floor(duration / 60);
   const sec = Math.floor(duration - min * 60)

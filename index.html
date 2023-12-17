@@ -42,29 +42,39 @@
         margin-top: 0.5em;
       }
       .albums {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 12em);
-        place-content: flex-start space-between;
-        gap: 1.5em;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
       }
       .album {
         display: flex;
         align-items: center;
+        user-select: none;
+        cursor: pointer;
+      }
+      .albums > .album {
+        margin: 1em 0;
+        width: 300px;
+        max-width: 300px;
+      }
+      .photoList .photo {
+        margin: 0.35em;
       }
 
-      @supports not (display: grid) {
+      @supports (display: grid) {
         .albums {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
+          display: grid;
+          grid-template-columns: repeat(auto-fill, 12em);
+          place-content: flex-start space-between;
+          gap: 1.5em;
         }
         .albums > .album {
-          margin: 1em 0;
-          width: 300px;
-          max-width: 300px;
+          margin: unset;
+          width: unset;
+          max-width: unset;
         }
         .photoList .photo {
-          margin: 0.35em;
+          margin: unset;
         }
       }
 
