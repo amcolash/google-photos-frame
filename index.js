@@ -18,7 +18,8 @@ nconf.load();
 nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
-const SSH_ENABLE = true;
+const SSH_ENABLE = process.env.IPAD_IP && process.env.IPAD_PASSWORD;
+// const SSH_ENABLE = true;
 
 const imageCache = join(__dirname, 'tmp/');
 ['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
@@ -218,11 +219,11 @@ app.get('/image/:id', async (req, res) => {
   const file = join(imageCache, subdir, id + '.jpg');
 
   if (existsSync(file)) {
-    console.log('Using cached image', id);
+    // console.log('Using cached image', id);
     const image = readFileSync(file);
     res.send(image);
   } else {
-    console.log('Fetching image', id, file);
+    // console.log('Fetching image', id, file);
     const data = await fetch(url);
     const image = await data.buffer();
     writeFileSync(file, image);

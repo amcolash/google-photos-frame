@@ -188,7 +188,9 @@ function PhotoList(props) {
                   ? `${SERVER}/image?size=64&id=${i.id}`
                   : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
               }
-              threshold={1000}
+              height={64}
+              width={64}
+              placeholder={<span style={{ width: 64, height: 64, backgroundColor: colors.dim }} />}
             />
           </button>
         ))}
