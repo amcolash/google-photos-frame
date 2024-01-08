@@ -191,7 +191,7 @@ function PhotoList(props) {
           {props.items.map((i, n) => (
             <button
               key={i.id}
-              style={{ padding: 0, border: 'none', background: 'none' }}
+              style={{ padding: 0, border: 'none', background: 'none', outline: cropPhoto === n ? `4px solid ${colors.theme}` : undefined }}
               onClick={() => {
                 if (cropPhoto) {
                   setCropPhoto(n);
@@ -222,6 +222,7 @@ function PhotoList(props) {
           nextPhoto={() => {
             if (cropPhoto) setCropPhoto((cropPhoto + 1) % props.items.length);
           }}
+          progress={(cropPhoto || 0) / props.items.length}
         />
       </div>
     </div>

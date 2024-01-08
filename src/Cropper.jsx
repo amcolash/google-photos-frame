@@ -104,6 +104,8 @@ export function Cropper(props) {
                   Next
                 </button>
               </div>
+
+              <progress value={props.progress} style={{ width: '100%', marginTop: '2em' }} />
             </div>
           )}
         </div>
