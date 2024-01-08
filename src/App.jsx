@@ -52,6 +52,7 @@ export const App = () => {
                   setRestarting(false);
                 }}
                 style={{ padding: '0.45em', marginRight: '1em' }}
+                title="Restart Client"
               >
                 {restarting ? (
                   <div className="lds-ring">
@@ -65,10 +66,14 @@ export const App = () => {
                 )}
               </button>
             )}
-            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', marginRight: '1em' }}>
+            <button onClick={() => setServerTime(Date.now())} style={{ padding: '0.45em', marginRight: '1em' }} title="Restart Server">
               <Clock style={{ marginRight: 0 }} />
             </button>
-            <button onClick={() => setAmbientMode(!ambientMode)} style={{ padding: '0.45em', marginRight: '2em' }}>
+            <button
+              onClick={() => setAmbientMode(!ambientMode)}
+              style={{ padding: '0.45em', marginRight: '2em' }}
+              title="Toggle Light Sensing"
+            >
               {ambientMode ? <Zap style={{ marginRight: 0 }} /> : <ZapOff style={{ marginRight: 0 }} />}
             </button>
             <div className="right flex align-center" />

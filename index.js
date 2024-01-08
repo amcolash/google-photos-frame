@@ -19,7 +19,7 @@ nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
 const SSH_ENABLE = process.env.IPAD_IP && process.env.IPAD_PASSWORD;
-// const SSH_ENABLE = true;
+// const SSH_ENABLE = false;
 
 const imageCache = join(__dirname, 'tmp/');
 ['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
@@ -218,17 +218,24 @@ app.get('/image/:id', async (req, res) => {
 
   const file = join(imageCache, subdir, id + '.jpg');
 
-  if (existsSync(file)) {
-    // console.log('Using cached image', id);
-    const image = readFileSync(file);
-    res.send(image);
-  } else {
+  async function getFile() {
     // console.log('Fetching image', id, file);
     const data = await fetch(url);
     const image = await data.buffer();
     writeFileSync(file, image);
 
     res.send(image);
+  }
+
+  if (existsSync(file)) {
+    // console.log('Using cached image', id);
+    const image = readFileSync(file);
+
+    // Attempt to refetch if cached image is invalid
+    if (image.toString().includes('<!DOCTYPE html>')) await getFile();
+    else res.send(image);
+  } else {
+    await getFile();
   }
 });
 
@@ -320,6 +327,18 @@ app.get('/crop/:id', async (req, res) => {
     console.error(err);
     res.status(500).send(err);
   }
+});
+
+app.post('/crop/:id', async (req, res) => {
+  const id = req.params.id;
+
+  const cropHints = { top: Number.parseInt(req.query.top) };
+  cropCache[id] = cropHints;
+
+  nconf.set('cropCache', cropCache);
+  nconf.save();
+
+  res.send(cropCache[id]);
 });
 
 async function authAndCache(url, opts, res, skipCache) {

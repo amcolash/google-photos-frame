@@ -6,10 +6,12 @@ import equal from 'fast-deep-equal/es6';
 
 import Back from './img/arrow-left.svg?react';
 import Play from './img/play.svg?react';
+import Crop from './img/crop.svg?react';
 
 import { Slideshow } from './Slideshow';
 import { colors, isIpad, logError, placeholder, SERVER, shuffle, slideshowActive } from './util';
 import { usePrevious } from './hooks/usePrevious';
+import { Cropper } from './Cropper';
 
 const noSleep = new NoSleep();
 
@@ -139,6 +141,8 @@ function PhotoList(props) {
     (found ? found.baseUrl : props.album.coverPhotoBaseUrl) + '=s128-c'
   )}`;
 
+  const [cropPhoto, setCropPhoto] = useState(false);
+
   return (
     <div className="photoList">
       <div className="flex align-center">
@@ -159,41 +163,67 @@ function PhotoList(props) {
             <Play />
             Slideshow
           </button>
+          {!isIpad() && (
+            <button
+              style={{ marginLeft: '1em', background: cropPhoto ? colors.theme : undefined }}
+              onClick={() => {
+                setCropPhoto(!cropPhoto);
+              }}
+            >
+              <Crop />
+              Crop Photos
+            </button>
+          )}
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, 4em)',
-          placeContent: 'flex-start space-between',
-          gap: '0.5em',
-          marginTop: '2em',
-        }}
-      >
-        {props.items.map((i) => (
-          <button
-            key={i.id}
-            style={{ padding: 0, border: 'none', background: 'none' }}
-            onClick={() => {
-              const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
-              props.setSlideshowItems([i, ...shuffledItems]);
-              localStorage.setItem(slideshowActive, true);
-            }}
-          >
-            <LazyLoadImage
-              className="photo"
-              src={
-                placeholder
-                  ? `${SERVER}/image?size=64&id=${i.id}`
-                  : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
-              }
-              height={64}
-              width={64}
-              placeholder={<span style={{ width: 64, height: 64, backgroundColor: colors.dim }} />}
-            />
-          </button>
-        ))}
+      <div style={{ display: 'flex' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, 4em)',
+            placeContent: 'flex-start space-between',
+            gap: '0.5em',
+            marginTop: '2em',
+            flex: 1,
+          }}
+        >
+          {props.items.map((i) => (
+            <button
+              key={i.id}
+              style={{ padding: 0, border: 'none', background: 'none' }}
+              onClick={() => {
+                if (cropPhoto) {
+                  setCropPhoto(i);
+                  fetch(`${SERVER}/crop/${i.id}?url=${i.baseUrl}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                      setCropPhoto({ ...i, top: data.top });
+                    })
+                    .catch((err) => console.error(err));
+                } else {
+                  const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
+                  props.setSlideshowItems([i, ...shuffledItems]);
+                  localStorage.setItem(slideshowActive, true);
+                }
+              }}
+            >
+              <LazyLoadImage
+                className="photo"
+                src={
+                  placeholder
+                    ? `${SERVER}/image?size=64&id=${i.id}`
+                    : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
+                }
+                height={64}
+                width={64}
+                placeholder={<span style={{ width: 64, height: 64, backgroundColor: colors.dim }} />}
+              />
+            </button>
+          ))}
+        </div>
+
+        <Cropper cropPhoto={cropPhoto} />
       </div>
     </div>
   );
