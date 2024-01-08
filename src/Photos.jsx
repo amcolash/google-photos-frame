@@ -165,7 +165,7 @@ function PhotoList(props) {
           </button>
           {!isIpad() && (
             <button
-              style={{ marginLeft: '1em', background: cropPhoto ? colors.theme : undefined }}
+              style={{ marginLeft: '1em', background: cropPhoto ? colors.theme : undefined, color: cropPhoto ? colors.light : undefined }}
               onClick={() => {
                 setCropPhoto(!cropPhoto);
               }}
@@ -188,19 +188,13 @@ function PhotoList(props) {
             flex: 1,
           }}
         >
-          {props.items.map((i) => (
+          {props.items.map((i, n) => (
             <button
               key={i.id}
               style={{ padding: 0, border: 'none', background: 'none' }}
               onClick={() => {
                 if (cropPhoto) {
-                  setCropPhoto(i);
-                  fetch(`${SERVER}/crop/${i.id}?url=${i.baseUrl}`)
-                    .then((res) => res.json())
-                    .then((data) => {
-                      setCropPhoto({ ...i, top: data.top });
-                    })
-                    .catch((err) => console.error(err));
+                  setCropPhoto(n);
                 } else {
                   const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
                   props.setSlideshowItems([i, ...shuffledItems]);
@@ -223,7 +217,12 @@ function PhotoList(props) {
           ))}
         </div>
 
-        <Cropper cropPhoto={cropPhoto} />
+        <Cropper
+          cropPhoto={props.items[cropPhoto] || cropPhoto}
+          nextPhoto={() => {
+            if (cropPhoto) setCropPhoto((cropPhoto + 1) % props.items.length);
+          }}
+        />
       </div>
     </div>
   );

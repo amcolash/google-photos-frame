@@ -8,8 +8,8 @@ const { join, basename } = require('path');
 const ExifImage = require('exif').ExifImage;
 const CronJob = require('cron').CronJob;
 const vision = require('@google-cloud/vision');
-const { existsSync, writeFileSync, readFileSync, mkdirSync } = require('fs');
-const { readFile } = require('fs/promises');
+const { readFile, writeFile, stat } = require('fs/promises');
+const { mkdirSync, existsSync } = require('fs');
 
 require('dotenv').config();
 
@@ -18,8 +18,8 @@ nconf.load();
 nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
-const SSH_ENABLE = process.env.IPAD_IP && process.env.IPAD_PASSWORD;
-// const SSH_ENABLE = false;
+// const SSH_ENABLE = process.env.IPAD_IP && process.env.IPAD_PASSWORD;
+const SSH_ENABLE = false;
 
 const imageCache = join(__dirname, 'tmp/');
 ['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
@@ -222,14 +222,16 @@ app.get('/image/:id', async (req, res) => {
     // console.log('Fetching image', id, file);
     const data = await fetch(url);
     const image = await data.buffer();
-    writeFileSync(file, image);
+    await writeFile(file, image);
 
     res.send(image);
   }
 
-  if (existsSync(file)) {
+  const cached = await stat(file).catch((err) => {});
+
+  if (cached) {
     // console.log('Using cached image', id);
-    const image = readFileSync(file);
+    const image = await readFile(file);
 
     // Attempt to refetch if cached image is invalid
     if (image.toString().includes('<!DOCTYPE html>')) await getFile();
