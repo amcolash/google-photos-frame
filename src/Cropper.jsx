@@ -8,8 +8,12 @@ export function Cropper(props) {
   const cropPhoto = props.cropPhoto;
   const [cropTop, setCropTop] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    setSaving(false);
+    setSaved(false);
+
     if (cropPhoto && cropPhoto !== true) {
       setCropTop(0);
 
@@ -82,7 +86,10 @@ export function Cropper(props) {
                     setSaving(true);
                     fetch(`${SERVER}/crop/${cropPhoto.id}?top=${cropTop}`, { method: 'POST' })
                       .then((res) => res.json())
-                      .then((data) => console.log(data))
+                      .then((data) => {
+                        console.log(data);
+                        setSaved(true);
+                      })
                       .catch((err) => console.error(err))
                       .finally(() => setSaving(false));
                   }}
@@ -90,6 +97,7 @@ export function Cropper(props) {
                   style={{ background: colors.theme, color: colors.light }}
                 >
                   Save
+                  <span style={{ color: colors.theme, position: 'absolute', bottom: '0.25em', marginLeft: '0.75em' }}>{saved && '✓'}</span>
                 </button>
 
                 <button onClick={props.nextPhoto} disabled={saving}>
