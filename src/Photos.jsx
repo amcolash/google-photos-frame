@@ -222,6 +222,9 @@ function PhotoList(props) {
           nextPhoto={() => {
             if (cropPhoto) setCropPhoto((cropPhoto + 1) % props.items.length);
           }}
+          previousPhoto={() => {
+            if (cropPhoto) setCropPhoto(Math.max(0, cropPhoto - 1));
+          }}
           progress={(cropPhoto || 0) / props.items.length}
           close={() => setCropPhoto(false)}
         />

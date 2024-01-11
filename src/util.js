@@ -45,3 +45,4 @@ export function logError(e) {
 export const ipadHeight = 768;
 export const ipadWidth = 1024;
 export const imageWidth = 1200;
+export const minImageHeight = 900;

@@ -6,7 +6,7 @@ import Crop from './img/crop.svg?react';
 import ArrowRight from './img/arrow-right.svg?react';
 
 import { useSetting } from './hooks/useSetting';
-import { colors, imageWidth, isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
+import { colors, imageWidth, isIpad, logError, placeholder, SERVER, slideshowActive, minImageHeight } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -21,6 +21,7 @@ const HeaderRight = (props) =>
 export function Slideshow(props) {
   const [overlay, setOverlay] = useState(true);
   const [current, setCurrent] = useState(0);
+  const [imageDims, setImageDims] = useState({});
   const [cropBounds, setCropBounds] = useState({});
 
   const [duration, setDuration] = useSetting('duration', props.client, 60);
@@ -48,7 +49,22 @@ export function Slideshow(props) {
   }, [duration, current, props.items]);
 
   useEffect(() => {
-    fetchCrop(props.items[current]);
+    const currentItem = props.items[current];
+
+    fetchCrop(currentItem);
+
+    if (!imageDims[currentItem.id]) {
+      const img = new Image();
+      img.src = placeholder
+        ? `${SERVER}/image?size=1200&id=${currentItem.id}`
+        : `${SERVER}/image/${currentItem.id}?subdir=image&url=${encodeURIComponent(`${currentItem.baseUrl}=w${imageWidth}`)}`;
+
+      img.onload = () =>
+        setImageDims((prev) => {
+          return { ...prev, [currentItem.id]: { width: img.width, height: img.height } };
+        });
+      img.onerror = () => setCurrent((prev) => (prev + 1) % props.items.length);
+    }
 
     // Preload the next image + crop bounds to try and prevent errors
     clearTimeout(loadTimer);
@@ -61,6 +77,11 @@ export function Slideshow(props) {
           nextImg.src = placeholder
             ? `${SERVER}/image?size=1200&id=${next.id}`
             : `${SERVER}/image/${next.id}?subdir=image&url=${encodeURIComponent(`${next.baseUrl}=w${imageWidth}`)}`;
+
+          next.onload = () =>
+            setImageDims((prev) => {
+              return { ...prev, [next.id]: { width: next.width, height: next.height } };
+            });
 
           fetchCrop(next);
         }
@@ -91,7 +112,7 @@ export function Slideshow(props) {
   let cropCenter;
   if (crop && cropBounds[photo.id]) {
     // 4:3 ratio crop size always used, so height is always the same
-    const height = 1200 * (4 / 3);
+    // const height = 1200 * (4 / 3);
 
     cropCenter = {
       // y: ((cropBounds[photo.id].top + height / 2) / height) * 100,
@@ -158,7 +179,7 @@ export function Slideshow(props) {
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: crop ? 'cover' : 'contain',
             // backgroundPosition: cropCenter ? `center top ${cropCenter.y}px` : 'center',
-            backgroundPosition: cropCenter ? `center top -${cropCenter.y}px` : 'center',
+            backgroundPosition: cropCenter && imageDims[photo.id]?.height > minImageHeight ? `center top -${cropCenter.y}px` : 'center',
             backgroundRepeat: 'no-repeat',
           }}
           // onError={(e) => {

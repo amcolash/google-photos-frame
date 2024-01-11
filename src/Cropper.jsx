@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SERVER, colors, imageWidth, ipadHeight } from './util';
+import { SERVER, colors, imageWidth, minImageHeight } from './util';
 
 export function Cropper(props) {
   const cropPhoto = props.cropPhoto;
@@ -26,11 +26,11 @@ export function Cropper(props) {
   }, [cropPhoto]);
 
   useEffect(() => {
-    if (dims.height < ipadHeight) setCropTop(0);
+    if (dims.height < minImageHeight) setCropTop(0);
   }, [dims]);
 
   const top = `${(cropTop / dims.height) * 100}%`;
-  const bottom = `${((dims.height - cropTop - ipadHeight) / dims.height) * 100}%`;
+  const bottom = `${((dims.height - cropTop - minImageHeight) / dims.height) * 100}%`;
 
   if (cropPhoto)
     return (
@@ -80,12 +80,18 @@ export function Cropper(props) {
               <div style={{ display: 'flex', gap: '1em', alignItems: 'center', justifyContent: 'center', marginTop: '1em' }}>
                 <input
                   type="range"
-                  disabled={dims.height < ipadHeight}
+                  disabled={dims.height < minImageHeight + 5}
                   min={0}
-                  max={Math.abs(dims.height - ipadHeight)}
+                  max={Math.abs(dims.height - minImageHeight)}
+                  step={5}
                   value={cropTop}
                   onChange={(e) => setCropTop(Number.parseInt(e.target.value))}
                 />
+
+                <button onClick={props.previousPhoto} disabled={saving}>
+                  Previous
+                </button>
+
                 <button
                   onClick={() => {
                     setSaving(true);
@@ -96,17 +102,16 @@ export function Cropper(props) {
                         setSaved(true);
                       })
                       .catch((err) => console.error(err))
-                      .finally(() => setSaving(false));
+                      .finally(() => {
+                        setSaving(false);
+                        props.nextPhoto();
+                      });
                   }}
                   disabled={saving}
                   style={{ background: colors.theme, color: colors.light }}
                 >
-                  Save
+                  Save + Next
                   <span style={{ color: colors.theme, position: 'absolute', bottom: '0.25em', marginLeft: '0.75em' }}>{saved && '✓'}</span>
-                </button>
-
-                <button onClick={props.nextPhoto} disabled={saving}>
-                  Next
                 </button>
 
                 <button onClick={props.close} disabled={saving} style={{ background: '#d66', color: colors.light }}>
