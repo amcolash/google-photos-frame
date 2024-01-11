@@ -18,8 +18,8 @@ nconf.load();
 nconf.save();
 
 const IS_DOCKER = existsSync('/.dockerenv');
-// const SSH_ENABLE = process.env.IPAD_IP && process.env.IPAD_PASSWORD;
-const SSH_ENABLE = false;
+const SSH_ENABLE = IS_DOCKER && process.env.IPAD_IP && process.env.IPAD_PASSWORD;
+// const SSH_ENABLE = true;
 
 const imageCache = join(__dirname, 'tmp/');
 ['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
