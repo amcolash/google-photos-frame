@@ -41,3 +41,7 @@ export function logError(e) {
   if (console.error) console.error(e.message, e.stack);
   else console.log(e);
 }
+
+export const ipadHeight = 768;
+export const ipadWidth = 1024;
+export const imageWidth = 1200;

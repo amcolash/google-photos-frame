@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { SERVER, colors } from './util';
-
-const dims = 1200;
-const height = 1200 / 1.33;
+import { SERVER, colors, imageWidth, ipadHeight } from './util';
 
 export function Cropper(props) {
   const cropPhoto = props.cropPhoto;
   const [cropTop, setCropTop] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const [dims, setDims] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     setSaving(false);
@@ -26,8 +25,12 @@ export function Cropper(props) {
     }
   }, [cropPhoto]);
 
-  const top = `${(cropTop / dims) * 100}%`;
-  const bottom = `${(1 - (cropTop + height) / dims) * 100}%`;
+  useEffect(() => {
+    if (dims.height < ipadHeight) setCropTop(0);
+  }, [dims]);
+
+  const top = `${(cropTop / dims.height) * 100}%`;
+  const bottom = `${((dims.height - cropTop - ipadHeight) / dims.height) * 100}%`;
 
   if (cropPhoto)
     return (
@@ -56,8 +59,9 @@ export function Cropper(props) {
             <div>
               <div style={{ position: 'relative', display: 'flex', overflow: 'hidden' }}>
                 <img
-                  src={`${SERVER}/image/${cropPhoto.id}?subdir=image&url=${encodeURIComponent(`${cropPhoto.baseUrl}=s1200-c`)}`}
+                  src={`${SERVER}/image/${cropPhoto.id}?subdir=image&url=${encodeURIComponent(`${cropPhoto.baseUrl}=w${imageWidth}`)}`}
                   style={{ maxHeight: '80vh', maxWidth: '100%', borderRadius: 0 }}
+                  onLoad={(e) => setDims({ width: e.target.naturalWidth, height: e.target.naturalHeight })}
                 />
                 <div
                   style={{
@@ -76,8 +80,9 @@ export function Cropper(props) {
               <div style={{ display: 'flex', gap: '1em', alignItems: 'center', justifyContent: 'center', marginTop: '1em' }}>
                 <input
                   type="range"
+                  disabled={dims.height < ipadHeight}
                   min={0}
-                  max={dims - height}
+                  max={Math.abs(dims.height - ipadHeight)}
                   value={cropTop}
                   onChange={(e) => setCropTop(Number.parseInt(e.target.value))}
                 />
@@ -87,7 +92,7 @@ export function Cropper(props) {
                     fetch(`${SERVER}/crop/${cropPhoto.id}?top=${cropTop}`, { method: 'POST' })
                       .then((res) => res.json())
                       .then((data) => {
-                        console.log(data);
+                        // console.log(data);
                         setSaved(true);
                       })
                       .catch((err) => console.error(err))
@@ -102,6 +107,10 @@ export function Cropper(props) {
 
                 <button onClick={props.nextPhoto} disabled={saving}>
                   Next
+                </button>
+
+                <button onClick={props.close} disabled={saving} style={{ background: '#d66', color: colors.light }}>
+                  Cancel
                 </button>
               </div>
 

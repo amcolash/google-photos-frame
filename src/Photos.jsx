@@ -223,6 +223,7 @@ function PhotoList(props) {
             if (cropPhoto) setCropPhoto((cropPhoto + 1) % props.items.length);
           }}
           progress={(cropPhoto || 0) / props.items.length}
+          close={() => setCropPhoto(false)}
         />
       </div>
     </div>

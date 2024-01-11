@@ -234,8 +234,10 @@ app.get('/image/:id', async (req, res) => {
     const image = await readFile(file);
 
     // Attempt to refetch if cached image is invalid
-    if (image.toString().includes('<!DOCTYPE html>')) await getFile();
-    else res.send(image);
+    if (image.toString().includes('<!DOCTYPE html>')) {
+      console.log('Cached image is invalid, refetching', id);
+      await getFile();
+    } else res.send(image);
   } else {
     await getFile();
   }
@@ -308,7 +310,7 @@ app.get('/crop/:id', async (req, res) => {
       return;
     }
 
-    const data = await fetch(url + '=s1200-c').then((res) => res.buffer());
+    const data = await fetch(url + '=w1200').then((res) => res.buffer());
 
     const [result] = await visionClient.cropHints({
       image: { content: data },

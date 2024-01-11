@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 
 import Back from './img/arrow-left.svg?react';
 import Crop from './img/crop.svg?react';
+import ArrowRight from './img/arrow-right.svg?react';
 
 import { useSetting } from './hooks/useSetting';
-import { isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
+import { colors, imageWidth, isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -59,7 +60,7 @@ export function Slideshow(props) {
           const nextImg = new Image();
           nextImg.src = placeholder
             ? `${SERVER}/image?size=1200&id=${next.id}`
-            : `${SERVER}/image/${next.id}?subdir=image&url=${encodeURIComponent(`${next.baseUrl}=s1200-c`)}`;
+            : `${SERVER}/image/${next.id}?subdir=image&url=${encodeURIComponent(`${next.baseUrl}=w${imageWidth}`)}`;
 
           fetchCrop(next);
         }
@@ -80,7 +81,7 @@ export function Slideshow(props) {
   const photo = props.items[current] || {};
   const imageUrl = placeholder
     ? `${SERVER}/image?size=1200&id=${photo.id}`
-    : `${SERVER}/image/${photo.id}?subdir=image&url=${encodeURIComponent(`${photo.baseUrl}=s1200-c`)}`;
+    : `${SERVER}/image/${photo.id}?subdir=image&url=${encodeURIComponent(`${photo.baseUrl}=w${imageWidth}`)}`;
 
   const min = Math.floor(duration / 60);
   const sec = Math.floor(duration - min * 60)
@@ -93,7 +94,8 @@ export function Slideshow(props) {
     const height = 1200 * (4 / 3);
 
     cropCenter = {
-      y: ((cropBounds[photo.id].top + height / 2) / height) * 100,
+      // y: ((cropBounds[photo.id].top + height / 2) / height) * 100,
+      y: cropBounds[photo.id].top,
     };
   }
 
@@ -155,7 +157,8 @@ export function Slideshow(props) {
             background: 'black',
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: crop ? 'cover' : 'contain',
-            backgroundPosition: cropCenter ? `center top ${cropCenter.y}%` : 'center',
+            // backgroundPosition: cropCenter ? `center top ${cropCenter.y}px` : 'center',
+            backgroundPosition: cropCenter ? `center top -${cropCenter.y}px` : 'center',
             backgroundRepeat: 'no-repeat',
           }}
           // onError={(e) => {
@@ -171,12 +174,23 @@ export function Slideshow(props) {
           bottom: '1em',
           right: '1em',
           color: 'white',
-          textShadow: '0 0 0.35em black',
+          textShadow: '0 0 0.5em black',
           opacity: overlay ? 1 : 0,
           transition: 'opacity 0.5s',
         }}
       >
-        {current + 1} / {props.items.length}
+        <button
+          style={{ color: colors.light, border: 'none' }}
+          onClick={() => setCurrent((prev) => (((prev - 1) % props.items.length) + props.items.length) % props.items.length)}
+        >
+          <Back />
+        </button>
+        <button style={{ color: colors.light, border: 'none' }} onClick={() => setCurrent((prev) => (prev + 1) % props.items.length)}>
+          <ArrowRight />
+        </button>
+        <span>
+          {current + 1} / {props.items.length}
+        </span>
       </div>
     </div>
   );
