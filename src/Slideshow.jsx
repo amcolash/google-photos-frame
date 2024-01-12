@@ -6,7 +6,7 @@ import Crop from './img/crop.svg?react';
 import ArrowRight from './img/arrow-right.svg?react';
 
 import { useSetting } from './hooks/useSetting';
-import { colors, imageWidth, isIpad, logError, placeholder, SERVER, slideshowActive, minImageHeight } from './util';
+import { colors, imageWidth, ipadHeight, isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
 
 let overlayTimer;
 let shuffleTimer;
@@ -179,7 +179,7 @@ export function Slideshow(props) {
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: crop ? 'cover' : 'contain',
             // backgroundPosition: cropCenter ? `center top ${cropCenter.y}px` : 'center',
-            backgroundPosition: cropCenter && imageDims[photo.id]?.height > minImageHeight ? `center top -${cropCenter.y}px` : 'center',
+            backgroundPosition: cropCenter && imageDims[photo.id]?.height > ipadHeight ? `center top -${cropCenter.y}px` : 'center',
             backgroundRepeat: 'no-repeat',
           }}
           // onError={(e) => {

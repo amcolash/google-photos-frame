@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { SERVER, colors, imageWidth, minImageHeight } from './util';
+import React, { useEffect, useRef, useState } from 'react';
+import { SERVER, colors, imageWidth, ipadHeight, ipadWidth } from './util';
+
+let dragOffset = 0;
 
 export function Cropper(props) {
   const cropPhoto = props.cropPhoto;
   const [cropTop, setCropTop] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const dragRef = useRef();
 
   const [dims, setDims] = useState({ width: 0, height: 0 });
 
@@ -26,11 +29,12 @@ export function Cropper(props) {
   }, [cropPhoto]);
 
   useEffect(() => {
-    if (dims.height < minImageHeight) setCropTop(0);
+    if (dims.height < ipadHeight) setCropTop(0);
   }, [dims]);
 
   const top = `${(cropTop / dims.height) * 100}%`;
-  const bottom = `${((dims.height - cropTop - minImageHeight) / dims.height) * 100}%`;
+  const bottom = `${((dims.height - cropTop - ipadHeight) / dims.height) * 100}%`;
+  const edge = `${((dims.width - ipadWidth) / 2 / dims.width) * 100}%`;
 
   if (cropPhoto)
     return (
@@ -57,7 +61,17 @@ export function Cropper(props) {
             <h2>Choose a photo to crop</h2>
           ) : (
             <div>
-              <div style={{ position: 'relative', display: 'flex', overflow: 'hidden' }}>
+              <div
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  overflow: 'hidden',
+                  width: 'fit-content',
+                  height: 'fit-content',
+                  userSelect: 'none',
+                }}
+                ref={dragRef}
+              >
                 <img
                   src={`${SERVER}/image/${cropPhoto.id}?subdir=image&url=${encodeURIComponent(`${cropPhoto.baseUrl}=w${imageWidth}`)}`}
                   style={{ maxHeight: '80vh', maxWidth: '100%', borderRadius: 0 }}
@@ -66,13 +80,33 @@ export function Cropper(props) {
                 <div
                   style={{
                     position: 'absolute',
-                    left: 0,
-                    right: 0,
+                    left: edge,
+                    right: edge,
                     top,
                     bottom,
                     outline: '2px solid white',
                     boxShadow: '0 0 0 9999px rgba(0,0,0,0.75)',
                     zIndex: 1,
+                    cursor: 'ns-resize',
+                  }}
+                  onMouseDown={(e) => {
+                    const el = dragRef.current;
+                    if (!el) return;
+
+                    const localCursorY = e.clientY - el.getBoundingClientRect().top;
+                    const cursorPercentage = localCursorY / el.getBoundingClientRect().height;
+
+                    dragOffset = Math.max(0, cursorPercentage * dims.height - cropTop);
+                  }}
+                  onMouseMove={(e) => {
+                    const el = dragRef.current;
+                    if (e.buttons !== 1 || !el || e.target === el) return;
+
+                    const localCursorY = e.clientY - el.getBoundingClientRect().top;
+                    const cursorPercentage = localCursorY / el.getBoundingClientRect().height;
+
+                    const cropTop = cursorPercentage * dims.height - dragOffset;
+                    setCropTop(Math.max(0, Math.min(Math.abs(dims.height - ipadHeight), cropTop)));
                   }}
                 ></div>
               </div>
@@ -80,9 +114,9 @@ export function Cropper(props) {
               <div style={{ display: 'flex', gap: '1em', alignItems: 'center', justifyContent: 'center', marginTop: '1em' }}>
                 <input
                   type="range"
-                  disabled={dims.height < minImageHeight + 5}
+                  disabled={dims.height < ipadHeight + 5}
                   min={0}
-                  max={Math.abs(dims.height - minImageHeight)}
+                  max={Math.abs(dims.height - ipadHeight)}
                   step={5}
                   value={cropTop}
                   onChange={(e) => setCropTop(Number.parseInt(e.target.value))}

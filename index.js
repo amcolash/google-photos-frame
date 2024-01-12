@@ -219,12 +219,17 @@ app.get('/image/:id', async (req, res) => {
   const file = join(imageCache, subdir, id + '.jpg');
 
   async function getFile() {
-    // console.log('Fetching image', id, file);
-    const data = await fetch(url);
-    const image = await data.buffer();
-    await writeFile(file, image);
+    try {
+      // console.log('Fetching image', id, file);
+      const data = await fetch(url);
+      const image = await data.buffer();
+      await writeFile(file, image);
 
-    res.send(image);
+      res.send(image);
+    } catch (err) {
+      console.error(err);
+      res.sendStatus(500);
+    }
   }
 
   const cached = await stat(file).catch((err) => {});
