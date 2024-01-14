@@ -54,6 +54,7 @@ export function Photos(props) {
           setItems(allItems);
         } catch (err) {
           logError(err);
+          setTimeout(() => setRefreshCounter((prev) => prev + 1), 10 * 1000);
         }
 
         setProgress((index * 100) / album.mediaItemsCount);
@@ -68,13 +69,13 @@ export function Photos(props) {
       }
     });
 
-    const timer = setTimeout(() => setRefreshCounter(refreshCounter + 1), 15 * 60 * 1000);
+    const timer = setTimeout(() => setRefreshCounter((prev) => prev + 1), 15 * 60 * 1000);
 
     return () => {
       if (timer) clearTimeout(timer);
       loadMore = false;
     };
-  }, [refreshCounter, setRefreshCounter]);
+  }, [setRefreshCounter]);
 
   useEffect(() => {
     if (!equal(album, previousAlbum)) setRefreshCounter(refreshCounter + 1);
@@ -193,7 +194,7 @@ function PhotoList(props) {
               key={i.id}
               style={{ padding: 0, border: 'none', background: 'none', outline: cropPhoto === n ? `4px solid ${colors.theme}` : undefined }}
               onClick={() => {
-                if (cropPhoto) {
+                if (cropPhoto !== false) {
                   setCropPhoto(n);
                 } else {
                   const shuffledItems = shuffle([...props.items]).filter((item) => item.id !== i.id);
@@ -202,17 +203,19 @@ function PhotoList(props) {
                 }
               }}
             >
-              <LazyLoadImage
-                className="photo"
-                src={
-                  placeholder
-                    ? `${SERVER}/image?size=64&id=${i.id}`
-                    : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
-                }
-                height={64}
-                width={64}
-                placeholder={<span style={{ width: 64, height: 64, backgroundColor: colors.dim }} />}
-              />
+              {(props.progress === 1 || n < 50) && (
+                <LazyLoadImage
+                  className="photo"
+                  src={
+                    placeholder
+                      ? `${SERVER}/image?size=64&id=${i.id}`
+                      : `${SERVER}/image/${i.id}?subdir=thumbnail&url=${encodeURIComponent(`${i.baseUrl}=s64-c`)}`
+                  }
+                  height={64}
+                  width={64}
+                  placeholder={<span style={{ width: 64, height: 64, backgroundColor: colors.dim }} />}
+                />
+              )}
             </button>
           ))}
         </div>

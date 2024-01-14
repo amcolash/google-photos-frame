@@ -100,7 +100,7 @@ export function Cropper(props) {
                   }}
                   onMouseMove={(e) => {
                     const el = dragRef.current;
-                    if (e.buttons !== 1 || !el || e.target === el) return;
+                    if (e.buttons !== 1 || !el || e.target === el || saving) return;
 
                     const localCursorY = e.clientY - el.getBoundingClientRect().top;
                     const cursorPercentage = localCursorY / el.getBoundingClientRect().height;
@@ -112,7 +112,7 @@ export function Cropper(props) {
               </div>
 
               <div style={{ display: 'flex', gap: '1em', alignItems: 'center', justifyContent: 'center', marginTop: '1em' }}>
-                <input
+                {/* <input
                   type="range"
                   disabled={dims.height < ipadHeight + 5}
                   min={0}
@@ -120,7 +120,7 @@ export function Cropper(props) {
                   step={5}
                   value={cropTop}
                   onChange={(e) => setCropTop(Number.parseInt(e.target.value))}
-                />
+                /> */}
 
                 <button onClick={props.previousPhoto} disabled={saving}>
                   Previous
