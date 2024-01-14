@@ -8,6 +8,7 @@ services:
     network_mode: 'host'
     volumes:
       - ./settings.json:/usr/src/app/settings.json
+      - ./tmp:/usr/src/app/tmp
     entrypoint: npm run docker
     env_file:
       - .env
