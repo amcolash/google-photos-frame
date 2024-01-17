@@ -32,10 +32,18 @@ export function Photos(props) {
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
+    // Keep track of loading and cancel if it takes too long
+    const timer = setTimeout(() => {
+      loadMore = false;
+      setProgress(0);
+      setTimeout(() => setRefreshCounter((prev) => prev + 1), 1000);
+    }, 20 * 1000);
+
     let loadMore = true;
 
+    // Using a timeout so we can use async/await
     setTimeout(async () => {
-      setProgress(Math.min(0.1, 100 / album.mediaItemsCount));
+      setProgress(Math.min(0.02, 100 / album.mediaItemsCount));
 
       let page = undefined;
       let allItems = [];
@@ -43,43 +51,46 @@ export function Photos(props) {
       while (loadMore) {
         try {
           const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
-          const data = await res.json();
 
-          page = data.nextPageToken;
-          if (!page) loadMore = false;
+          if (loadMore) {
+            const data = await res.json();
 
-          // Append new images and filter out non-image content, like videos
-          allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
+            page = data.nextPageToken;
+            if (!page) loadMore = false;
 
-          setItems(allItems);
+            // Append new images and filter out non-image content, like videos
+            allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
+
+            setItems(allItems);
+          }
         } catch (err) {
           logError(err);
-          setTimeout(() => setRefreshCounter((prev) => prev + 1), 10 * 1000);
+          loadMore = false;
         }
 
         setProgress((index * 100) / album.mediaItemsCount);
         index++;
       }
 
+      if (timer) clearTimeout(timer);
       setProgress(1);
 
       if (localStorage.getItem(slideshowActive)) {
         const shuffledItems = shuffle([...allItems]);
         setSlideshowItems(shuffledItems);
       }
-    });
+    }, 0);
 
-    const timer = setTimeout(() => setRefreshCounter((prev) => prev + 1), 15 * 60 * 1000);
-
-    return () => {
+    () => {
       if (timer) clearTimeout(timer);
-      loadMore = false;
     };
-  }, [setRefreshCounter]);
+  }, [refreshCounter, setRefreshCounter]);
 
   useEffect(() => {
-    if (!equal(album, previousAlbum)) setRefreshCounter(refreshCounter + 1);
-  }, [album, previousAlbum, refreshCounter, setRefreshCounter]);
+    if (previousAlbum && album && !equal(album, previousAlbum)) {
+      setRefreshCounter((prev) => prev + 1);
+    }
+  }, [album, previousAlbum, setRefreshCounter]);
 
   useEffect(() => {
     try {
