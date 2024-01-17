@@ -37,7 +37,7 @@ export function Photos(props) {
       loadMore = false;
       setProgress(0);
       setTimeout(() => setRefreshCounter((prev) => prev + 1), 1000);
-    }, 20 * 1000);
+    }, 30 * 1000);
 
     let loadMore = true;
 
