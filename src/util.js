@@ -34,7 +34,7 @@ export function shuffle(array) {
 }
 
 export function isIpad() {
-  return navigator.userAgent.toLowerCase().match('ipad');
+  return navigator.userAgent.toLowerCase().match('ipad') !== null;
 }
 
 export function logError(e) {

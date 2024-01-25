@@ -154,6 +154,7 @@ function PhotoList(props) {
   )}`;
 
   const [cropPhoto, setCropPhoto] = useState(false);
+  const [hidePhotos, setHidePhotos] = useState(isIpad());
 
   return (
     <div className="photoList">
@@ -186,6 +187,11 @@ function PhotoList(props) {
               Crop Photos
             </button>
           )}
+          {isIpad() && (
+            <button onClick={() => setHidePhotos(!hidePhotos)} style={{ color: colors.light, marginLeft: '1em' }}>
+              {hidePhotos ? 'Show Photos' : 'Hide Photos'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -214,7 +220,7 @@ function PhotoList(props) {
                 }
               }}
             >
-              {(props.progress === 1 || n < 50) && (
+              {!hidePhotos && (props.progress === 1 || n < 50) && (
                 <LazyLoadImage
                   className="photo"
                   src={
