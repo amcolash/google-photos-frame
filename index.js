@@ -10,6 +10,7 @@ const CronJob = require('cron').CronJob;
 const vision = require('@google-cloud/vision');
 const { readFile, writeFile, stat } = require('fs/promises');
 const { mkdirSync, existsSync } = require('fs');
+const compression = require('compression');
 
 require('dotenv').config();
 
@@ -125,6 +126,7 @@ if (!mockResponse && (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URL)) process.ex
 
 app.use(cors());
 app.use(express.json());
+app.use(compression());
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Example app listening on port ${port}`);
@@ -413,9 +415,9 @@ async function authAndCache(url, opts, res, skipCache) {
         json.mediaItems[i] = {
           baseUrl: m.baseUrl,
           id: m.id,
-          mimeType: m.mimeType,
-          width: Number.parseInt(m.mediaMetadata.width),
-          height: Number.parseInt(m.mediaMetadata.height),
+          // mimeType: m.mimeType,
+          // width: Number.parseInt(m.mediaMetadata.width),
+          // height: Number.parseInt(m.mediaMetadata.height),
         };
       });
     }

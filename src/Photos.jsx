@@ -40,9 +40,9 @@ export function Photos(props) {
       setProgress(0);
       setTimeout(() => setRefreshCounter((prev) => prev + 1), 1000);
     }, 30 * 1000);
-    setProgress(Math.min(0.02, 100 / album.mediaItemsCount));
 
     if (isIpad()) {
+      setProgress(0.35);
       setTimeout(async () => {
         let allItems = [];
 
@@ -50,7 +50,7 @@ export function Photos(props) {
           const res = await fetch(`${SERVER}/album_full/${album.id}`);
           const data = await res.json();
 
-          allItems = data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1);
+          allItems = data.mediaItems; //.filter((i) => i.mimeType.indexOf('image') !== -1);
           setItems(allItems);
         } catch (err) {
           logError(err);
@@ -65,6 +65,8 @@ export function Photos(props) {
         }
       });
     } else {
+      setProgress(Math.min(0.02, 100 / album.mediaItemsCount));
+
       // Using a timeout so we can use async/await
       setTimeout(async () => {
         let page = undefined;
@@ -81,7 +83,7 @@ export function Photos(props) {
               if (!page) loadMore = false;
 
               // Append new images and filter out non-image content, like videos
-              allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
+              allItems = [...allItems, ...data.mediaItems]; //.filter((i) => i.mimeType.indexOf('image') !== -1)];
 
               setItems(allItems);
             }
