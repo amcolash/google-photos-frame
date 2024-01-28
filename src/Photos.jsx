@@ -32,54 +32,77 @@ export function Photos(props) {
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
+    let loadMore = true;
+
     // Keep track of loading and cancel if it takes too long
     const timer = setTimeout(() => {
       loadMore = false;
       setProgress(0);
       setTimeout(() => setRefreshCounter((prev) => prev + 1), 1000);
     }, 30 * 1000);
+    setProgress(Math.min(0.02, 100 / album.mediaItemsCount));
 
-    let loadMore = true;
+    if (isIpad()) {
+      setTimeout(async () => {
+        let allItems = [];
 
-    // Using a timeout so we can use async/await
-    setTimeout(async () => {
-      setProgress(Math.min(0.02, 100 / album.mediaItemsCount));
-
-      let page = undefined;
-      let allItems = [];
-      let index = 1;
-      while (loadMore) {
         try {
-          const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
+          const res = await fetch(`${SERVER}/album_full/${album.id}`);
+          const data = await res.json();
 
-          if (loadMore) {
-            const data = await res.json();
-
-            page = data.nextPageToken;
-            if (!page) loadMore = false;
-
-            // Append new images and filter out non-image content, like videos
-            allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
-
-            setItems(allItems);
-          }
+          allItems = data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1);
+          setItems(allItems);
         } catch (err) {
           logError(err);
-          loadMore = false;
         }
 
-        setProgress((index * 100) / album.mediaItemsCount);
-        index++;
-      }
+        if (timer) clearTimeout(timer);
+        setProgress(1);
 
-      if (timer) clearTimeout(timer);
-      setProgress(1);
+        if (localStorage.getItem(slideshowActive)) {
+          const shuffledItems = shuffle([...allItems]);
+          setSlideshowItems(shuffledItems);
+        }
+      });
+    } else {
+      // Using a timeout so we can use async/await
+      setTimeout(async () => {
+        let page = undefined;
+        let allItems = [];
+        let index = 1;
+        while (loadMore) {
+          try {
+            const res = await fetch(`${SERVER}/album/${album.id}${page ? `/${page}` : ''}`);
 
-      if (localStorage.getItem(slideshowActive)) {
-        const shuffledItems = shuffle([...allItems]);
-        setSlideshowItems(shuffledItems);
-      }
-    }, 0);
+            if (loadMore) {
+              const data = await res.json();
+
+              page = data.nextPageToken;
+              if (!page) loadMore = false;
+
+              // Append new images and filter out non-image content, like videos
+              allItems = [...allItems, ...data.mediaItems.filter((i) => i.mimeType.indexOf('image') !== -1)];
+
+              setItems(allItems);
+            }
+          } catch (err) {
+            logError(err);
+            loadMore = false;
+          }
+
+          setProgress((index * 100) / album.mediaItemsCount);
+          index++;
+        }
+
+        if (timer) clearTimeout(timer);
+        setProgress(1);
+
+        if (localStorage.getItem(slideshowActive)) {
+          const shuffledItems = shuffle([...allItems]);
+          setSlideshowItems(shuffledItems);
+        }
+      }, 0);
+    }
 
     () => {
       if (timer) clearTimeout(timer);

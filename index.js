@@ -199,6 +199,43 @@ app.get('/album/:id/:page?', async (req, res) => {
   );
 });
 
+app.get('/album_full/:id', async (req, res) => {
+  if (mockResponse) {
+    res.send({
+      mediaItems: Array.from(mockedIds).map((i) => ({ id: i })),
+    });
+    return;
+  }
+
+  let hasMore = true;
+  let pageToken;
+  const albumData = { mediaItems: [] };
+
+  while (hasMore) {
+    const url = `https://photoslibrary.googleapis.com/v1/mediaItems:search`;
+    const data = await authAndCache(
+      url,
+      {
+        pageSize: '100',
+        albumId: req.params.id,
+        pageToken,
+      },
+      undefined
+      // true // for now, always skip cache since we will always need new base photos
+    );
+
+    if (data) {
+      albumData.mediaItems.push(...data.mediaItems);
+      if (data.nextPageToken) pageToken = data.nextPageToken;
+      else hasMore = false;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  res.send(albumData);
+});
+
 app.get('/image', (req, res) => {
   const size = req.query.size;
 
@@ -352,14 +389,14 @@ app.post('/crop/:id', async (req, res) => {
 
 async function authAndCache(url, opts, res, skipCache) {
   if (!REFRESH_TOKEN) {
-    res.send(401);
+    if (res) res.send(401);
     return;
   }
 
   const key = url + (opts ? JSON.stringify(opts) : '');
   if (CACHE[key] && !skipCache) {
-    res.send(CACHE[key]);
-    return;
+    if (res) res.send(CACHE[key]);
+    return CACHE[key];
   }
 
   try {
@@ -384,10 +421,11 @@ async function authAndCache(url, opts, res, skipCache) {
     }
 
     CACHE[key] = json;
-    res.send(json);
+    if (res) res.send(json);
+    return json;
   } catch (err) {
     console.error(err);
-    res.send(500);
+    if (res) res.send(500);
   }
 }
 
