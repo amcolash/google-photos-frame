@@ -4,7 +4,7 @@ const { google } = require('googleapis');
 const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
 const { NodeSSH } = require('node-ssh');
-const { join, basename } = require('path');
+const { join } = require('path');
 const ExifImage = require('exif').ExifImage;
 const CronJob = require('cron').CronJob;
 const vision = require('@google-cloud/vision');
@@ -23,7 +23,8 @@ const SSH_ENABLE = IS_DOCKER && process.env.IPAD_IP && process.env.IPAD_PASSWORD
 // const SSH_ENABLE = true;
 
 const imageCache = join(__dirname, 'tmp/');
-['album_sm', 'album_lg', 'thumbnail', 'image'].forEach((f) => {
+const cacheDirs = ['album_sm', 'album_lg', 'thumbnail', 'image'];
+cacheDirs.forEach((f) => {
   if (!existsSync(join(imageCache, f))) mkdirSync(join(imageCache, f), { recursive: true });
 });
 
@@ -411,15 +412,26 @@ async function authAndCache(url, opts, res, skipCache) {
     const json = await data.json();
 
     if (url.indexOf('mediaItems:search') !== -1) {
-      (json.mediaItems || []).forEach((m, i) => {
+      let i = 0;
+      for (let m of json.mediaItems) {
+        const file = join(imageCache, 'image', m.id + '.jpg');
+        let cached = await stat(file).catch((err) => {});
+        if (cached) {
+          const image = await readFile(file);
+
+          // Attempt to refetch if cached image is invalid
+          if (image.toString().includes('<!DOCTYPE html>')) cached = false;
+        }
+
         json.mediaItems[i] = {
-          baseUrl: m.baseUrl,
+          baseUrl: cached ? '[CACHED]' : m.baseUrl,
           id: m.id,
           // mimeType: m.mimeType,
           // width: Number.parseInt(m.mediaMetadata.width),
           // height: Number.parseInt(m.mediaMetadata.height),
         };
-      });
+        i++;
+      }
     }
 
     CACHE[key] = json;

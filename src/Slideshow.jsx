@@ -201,12 +201,15 @@ export function Slideshow(props) {
         }}
       >
         <button
-          style={{ color: colors.light, border: 'none' }}
+          style={{ color: colors.light, border: 'none', background: 'none' }}
           onClick={() => setCurrent((prev) => (((prev - 1) % props.items.length) + props.items.length) % props.items.length)}
         >
           <Back />
         </button>
-        <button style={{ color: colors.light, border: 'none' }} onClick={() => setCurrent((prev) => (prev + 1) % props.items.length)}>
+        <button
+          style={{ color: colors.light, border: 'none', background: 'none' }}
+          onClick={() => setCurrent((prev) => (prev + 1) % props.items.length)}
+        >
           <ArrowRight />
         </button>
         <span>
