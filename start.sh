@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Determine current mode (springboard, application, lockscreen)
+currentMode=$(activator current-mode)
+
+# Determine the current app running
+runningApp=$(activator current-app)
+
 # Check if Safari is running and close it
 function stopSafari() {
   if [[ $runningApp == "com.apple.webapp" ]]; then
@@ -32,14 +38,10 @@ function start() {
 }
 
 # If locked, unlock before starting
-currentMode=$(activator current-mode)
 if [[ $currentMode == "lockscreen" ]]; then
   activator send libactivator.lockscreen.dismiss
   sleep 3
 fi
-
-# Determine the current app running
-runningApp=$(activator current-app)
 
 # Only stop safari when "--restart" passed
 if [[ $1 == '--restart' ]]; then

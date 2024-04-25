@@ -464,8 +464,11 @@ async function checkAmbientLight() {
       status.brightness = exifData.exif.BrightnessValue;
       console.log(`Ambient light level: ${status.brightness.toFixed(4)}`);
 
+      const now = new Date();
+      const nighttime = now.getHours() < 7;
+
       if (status.brightness > cutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
-      if (status.brightness <= cutoff && status.mode === 'application') await ssh.execCommand(lockCommand);
+      if ((status.brightness <= cutoff || nighttime) && status.mode === 'application') await ssh.execCommand(lockCommand);
     });
   } catch (err) {
     console.error(err);
