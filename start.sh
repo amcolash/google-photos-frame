@@ -2,10 +2,10 @@
 
 # Check if Safari is running and close it
 function stopSafari() {
-  if [[ $(ps aux | grep Web | grep -v 'grep') ]]; then
+  if [[ $runningApp == "com.apple.webapp" ]]; then
     echo "Stopping Safari"
 
-    killall -9 Web > /dev/null
+    killall -9 Web >/dev/null
     sleep 5
   fi
 }
