@@ -42,7 +42,8 @@ const clientUrl = `http://192.168.1.101:${port}`;
 let CACHE = {};
 
 const status = { mode: undefined, brightness: undefined };
-const cutoff = -4.5;
+const imageCutoff = -4.5;
+const sensorCutoff = 1.0;
 
 const lockCommand = 'activator send libactivator.system.sleepbutton';
 const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
@@ -51,6 +52,8 @@ const getModeCommand = 'activator current-mode';
 const restartScript = '/var/mobile/start.sh';
 const startCommand = `chmod +x ${restartScript} && ${restartScript}`;
 const restartCommand = `chmod +x ${restartScript} && ${restartScript} --restart`;
+
+const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL, HA_KEY, HA_SERVER, HA_SENSOR } = process.env;
 
 const ssh = new NodeSSH();
 
@@ -69,7 +72,8 @@ if (SSH_ENABLE || IS_DOCKER) {
   }, 60 * 1000);
 
   // Check brightness every 20 seconds
-  setInterval(checkAmbientLight, 20 * 1000);
+  if (HA_SERVER && HA_KEY && HA_SENSOR) setInterval(checkHALight, 20 * 1000);
+  else setInterval(checkAmbientLight, 20 * 1000);
 
   // Check that Safari is running every 5 minutes
   setInterval(start, 5 * 60 * 1000);
@@ -95,6 +99,8 @@ if (SSH_ENABLE || IS_DOCKER) {
     if (ssh.isConnected()) await ssh.putFile(join(__dirname, 'start.sh'), restartScript);
     await restart();
   }, 10 * 1000);
+} else {
+  console.log('SSH Disabled');
 }
 
 // Clear the cache every 15 minutes
@@ -102,7 +108,6 @@ setInterval(() => {
   CACHE = {};
 }, 15 * 60 * 1000);
 
-const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 const visionClient = new vision.ImageAnnotatorClient({ authClient: oauth2Client });
 
@@ -443,6 +448,27 @@ async function authAndCache(url, opts, res, skipCache) {
   }
 }
 
+// Check ambient light level from Home Assistant (if configured) and lock/unlock iPad
+async function checkHALight() {
+  if (!settings.iPad.ambient || !ssh.isConnected()) return;
+
+  const url = `${HA_SERVER}/api/states/${HA_SENSOR}`;
+
+  try {
+    status.mode = (await ssh.execCommand(getModeCommand)).stdout; // springboard, application, lockscreen
+
+    const data = await (await fetch(url, { headers: { Authorization: `Bearer ${HA_KEY}` } })).json();
+    const state = Number.parseFloat(data.state);
+
+    console.log(`HA Ambient light level: ${state}`);
+
+    if (state >= sensorCutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
+    if (state < sensorCutoff && status.mode === 'application') await ssh.execCommand(lockCommand);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function checkAmbientLight() {
   if (!settings.iPad.ambient || !ssh.isConnected()) return;
 
@@ -467,8 +493,8 @@ async function checkAmbientLight() {
       const now = new Date();
       const nighttime = now.getHours() < 7;
 
-      if (status.brightness > cutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
-      if ((status.brightness <= cutoff || nighttime) && status.mode === 'application') await ssh.execCommand(lockCommand);
+      if (status.brightness > imageCutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
+      if ((status.brightness <= imageCutoff || nighttime) && status.mode === 'application') await ssh.execCommand(lockCommand);
     });
   } catch (err) {
     console.error(err);

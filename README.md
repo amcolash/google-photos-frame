@@ -24,10 +24,10 @@ Use [Legacy iOS Toolkit](https://github.com/LukeZGD/Legacy-iOS-Kit) to downgrade
 
 ### Manual Steps [Via SSH]
 
-- Regain storage by moving `/System/Library/LinguisticData` to `/var/stash/`: [steps](https://www.reddit.com/r/jailbreak/comments/5xtdt6/tutorial_discussion_solve_and_fix_100_full_system/)
+- Regain storage by moving `/System/Library/LinguisticData` to `/var/stash/` [(steps here)](https://www.reddit.com/r/jailbreak/comments/5xtdt6/tutorial_discussion_solve_and_fix_100_full_system/)
   - `mv /System/Library/LinguisticData /var/stash/`
   - `ln -s /var/stash/LinguisticData /System/Library/LinguisticData`
-- Change passwords from `alpine` using `passwd`
+- Change password for `mobile` + `root` users using `passwd`
 
 ### Install Jailbreak Tweaks
 
@@ -35,15 +35,19 @@ Use [Legacy iOS Toolkit](https://github.com/LukeZGD/Legacy-iOS-Kit) to downgrade
 
 - SimulateTouch
 - Activator
-- camshot
 - OpenSSH
 - Core Utilities
-- [App Sync Unified](http://cydia.akemi.ai) (iOS 9+)
-- [ReProvision Reborn](https://repo.satoh.dev) (iOS 9+)
+
+##### iOS 9
+
+- [App Sync Unified](http://cydia.akemi.ai)
+- [ReProvision Reborn](https://repo.satoh.dev)
 
 #### Optional
 
-- BarFade (Fade on Apps+Hide Bar on Most Apps)
-- Veency
-- illLookLater (Remember to Enable + All Apps)
+- nitrous (highly recommended, cannot buy and sources are shady)
 - vim
+- Veency
+- BarFade (Fade on Apps+Hide Bar on Most Apps)
+- illLookLater (Remember to Enable + All Apps)
+- camshot (if using camera ambient brightness)
