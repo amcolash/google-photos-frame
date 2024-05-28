@@ -1,6 +1,4 @@
 .env
 tmp/
 ambient.jpg
-index.js
-start.sh
 settings.json
