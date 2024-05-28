@@ -5,7 +5,6 @@ const nconf = require('nconf');
 const { default: fetch } = require('node-fetch');
 const { NodeSSH } = require('node-ssh');
 const { join } = require('path');
-const ExifImage = require('exif').ExifImage;
 const CronJob = require('cron').CronJob;
 const vision = require('@google-cloud/vision');
 const { readFile, writeFile, stat } = require('fs/promises');
@@ -60,20 +59,24 @@ const ssh = new NodeSSH();
 if (SSH_ENABLE || IS_DOCKER) {
   // Keep ssh connection alive every minute
   setIntervalImmediately(() => {
-    if (!ssh.isConnected())
-      ssh
-        .connect({
-          host: process.env.IPAD_IP,
-          username: 'mobile',
-          password: process.env.IPAD_PASSWORD,
-        })
-        .then(() => console.log('Connected to iPad'))
-        .catch((err) => console.error(`Error connecting to iPad\n${err}`));
+    if (!ssh.isConnected()) {
+      try {
+        ssh
+          .connect({
+            host: process.env.IPAD_IP,
+            username: 'mobile',
+            password: process.env.IPAD_PASSWORD,
+          })
+          .then(() => console.log('Connected to iPad'))
+          .catch((err) => console.error(`Error connecting to iPad\n${err}`));
+      } catch (err) {
+        console.error(`Error connecting to iPad\n${err}`);
+      }
+    }
   }, 60 * 1000);
 
-  // Check brightness every 20 seconds
-  if (HA_SERVER && HA_KEY && HA_SENSOR) setInterval(checkHALight, 20 * 1000);
-  else setInterval(checkAmbientLight, 20 * 1000);
+  // Check brightness every 10 seconds using home assistant
+  if (HA_SERVER && HA_KEY && HA_SENSOR) setInterval(checkHALight, 10 * 1000);
 
   // Check that Safari is running every 5 minutes
   setInterval(start, 5 * 60 * 1000);
@@ -464,38 +467,6 @@ async function checkHALight() {
 
     if (state >= sensorCutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
     if (state < sensorCutoff && status.mode === 'application') await ssh.execCommand(lockCommand);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function checkAmbientLight() {
-  if (!settings.iPad.ambient || !ssh.isConnected()) return;
-
-  try {
-    status.mode = (await ssh.execCommand(getModeCommand)).stdout; // springboard, application, lockscreen
-
-    const remoteFile = '/User/ambient.jpg';
-    const localFile = join(__dirname, 'ambient.jpg');
-
-    await ssh.execCommand(`camshot -front ${remoteFile}`);
-    await ssh.getFile(localFile, remoteFile);
-
-    new ExifImage({ image: localFile }, async function (error, exifData) {
-      if (error) {
-        console.error(error.message);
-        return;
-      }
-
-      status.brightness = exifData.exif.BrightnessValue;
-      console.log(`Ambient light level: ${status.brightness.toFixed(4)}`);
-
-      const now = new Date();
-      const nighttime = now.getHours() < 7;
-
-      if (status.brightness > imageCutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
-      if ((status.brightness <= imageCutoff || nighttime) && status.mode === 'application') await ssh.execCommand(lockCommand);
-    });
   } catch (err) {
     console.error(err);
   }
