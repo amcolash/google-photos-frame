@@ -486,7 +486,8 @@ async function start() {
 
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(startCommand);
-  log(`${response.stdout}${response.stderr}`);
+  log(response.stdout.split('\n'));
+  if (response.stderr) error(response.stderr);
 
   return response;
 }
@@ -498,7 +499,8 @@ async function restart() {
 
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(restartCommand);
-  log(`${response.stdout}${response.stderr}`);
+  log(response.stdout.split('\n'));
+  if (response.stderr) error(response.stderr);
 
   return response;
 }
@@ -518,10 +520,14 @@ function setIntervalImmediately(func, interval) {
   return setInterval(func, interval);
 }
 
-function log(message) {
-  console.log(`[${new Date().toLocaleString()}]: ${message}`);
+function log(...message) {
+  const date = `[${new Date().toLocaleString()}]: `;
+  const filler = ' '.repeat(date.length);
+  message.forEach((m, i) => console.log(`${i === 0 ? date : filler}${m}`));
 }
 
-function error(message) {
-  console.error(`[${new Date().toLocaleString()}]: ${message}`);
+function error(...message) {
+  const date = `[${new Date().toLocaleString()}]: `;
+  const filler = ' '.repeat(date.length);
+  message.forEach((m, i) => console.error(`${i === 0 ? date : filler}${m}`));
 }
