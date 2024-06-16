@@ -20,6 +20,7 @@ nconf.save();
 const IS_DOCKER = existsSync('/.dockerenv');
 const SSH_ENABLE = IS_DOCKER && process.env.IPAD_IP && process.env.IPAD_PASSWORD;
 // const SSH_ENABLE = true;
+const DEBUG = false;
 
 const imageCache = join(__dirname, 'tmp/');
 const cacheDirs = ['album_sm', 'album_lg', 'thumbnail', 'image'];
@@ -67,10 +68,10 @@ if (SSH_ENABLE || IS_DOCKER) {
             username: 'mobile',
             password: process.env.IPAD_PASSWORD,
           })
-          .then(() => console.log('Connected to iPad'))
-          .catch((err) => console.error(`Error connecting to iPad\n${err}`));
+          .then(() => log('Connected to iPad'))
+          .catch((err) => error(`Error connecting to iPad\n${err}`));
       } catch (err) {
-        console.error(`Error connecting to iPad\n${err}`);
+        error(`Error connecting to iPad\n${err}`);
       }
     }
   }, 60 * 1000);
@@ -89,7 +90,7 @@ if (SSH_ENABLE || IS_DOCKER) {
     if (Date.now() - lastPing > 60 * 1000 && ssh.isConnected()) {
       // status.mode is updated from checking ambient light
       if (status.mode === 'application') {
-        console.log('No ping in 60 seconds, restarting Safari');
+        log('No ping in 60 seconds, restarting Safari');
         restart();
       } else {
         lastPing = Date.now(); // reset ping time when not running application
@@ -103,7 +104,7 @@ if (SSH_ENABLE || IS_DOCKER) {
     await restart();
   }, 10 * 1000);
 } else {
-  console.log('SSH Disabled');
+  log('SSH Disabled');
 }
 
 // Clear the cache every 15 minutes
@@ -124,12 +125,12 @@ if (REFRESH_TOKEN) {
     refresh_token: REFRESH_TOKEN,
   });
 } else {
-  console.error(`No refresh token found, you must authenticate at http://localhost:${port}/oauth before using photos endpoints`);
+  error(`No refresh token found, you must authenticate at http://localhost:${port}/oauth before using photos endpoints`);
 }
 
-if (!CLIENT_ID) console.error('Missing env var: CLIENT_ID');
-if (!CLIENT_SECRET) console.error('Missing env var: CLIENT_SECRET');
-if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
+if (!CLIENT_ID) error('Missing env var: CLIENT_ID');
+if (!CLIENT_SECRET) error('Missing env var: CLIENT_SECRET');
+if (!REDIRECT_URL) error('Missing env var: REDIRECT_URL');
 
 if (!mockResponse && (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URL)) process.exit(1);
 
@@ -138,7 +139,7 @@ app.use(express.json());
 app.use(compression());
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Example app listening on port ${port}`);
+  log(`Example app listening on port ${port}`);
 });
 
 app.use('/', express.static('dist'));
@@ -268,14 +269,14 @@ app.get('/image/:id', async (req, res) => {
 
   async function getFile() {
     try {
-      // console.log('Fetching image', id, file);
+      // log('Fetching image', id, file);
       const data = await fetch(url);
       const image = await data.buffer();
       await writeFile(file, image);
 
       res.send(image);
     } catch (err) {
-      console.error(err);
+      error(err);
       res.sendStatus(500);
     }
   }
@@ -283,12 +284,12 @@ app.get('/image/:id', async (req, res) => {
   const cached = await stat(file).catch((err) => {});
 
   if (cached) {
-    // console.log('Using cached image', id);
+    // log('Using cached image', id);
     const image = await readFile(file);
 
     // Attempt to refetch if cached image is invalid
     if (image.toString().includes('<!DOCTYPE html>')) {
-      console.log('Cached image is invalid, refetching', id);
+      log('Cached image is invalid, refetching', id);
       await getFile();
     } else res.send(image);
   } else {
@@ -338,7 +339,7 @@ app.get('/ipad', async (req, res) => {
 
       res.sendStatus(200);
     } catch (err) {
-      console.error(err);
+      error(err);
       res.sendStatus(500);
     }
   } else res.sendStatus(404);
@@ -381,7 +382,7 @@ app.get('/crop/:id', async (req, res) => {
 
     res.send(cropHints);
   } catch (err) {
-    console.error(err);
+    error(err);
     res.status(500).send(err);
   }
 });
@@ -446,7 +447,7 @@ async function authAndCache(url, opts, res, skipCache) {
     if (res) res.send(json);
     return json;
   } catch (err) {
-    console.error(err);
+    error(err);
     if (res) res.send(500);
   }
 }
@@ -463,23 +464,29 @@ async function checkHALight() {
     const data = await (await fetch(url, { headers: { Authorization: `Bearer ${HA_KEY}` } })).json();
     const state = Number.parseFloat(data.state);
 
-    console.log(`HA Ambient light level: ${state}`);
+    if (DEBUG) log(`HA Ambient light level: ${state}`);
 
-    if (state >= sensorCutoff && status.mode === 'lockscreen') await ssh.execCommand(unlockCommand);
-    if (state < sensorCutoff && status.mode === 'application') await ssh.execCommand(lockCommand);
+    if (state >= sensorCutoff && status.mode === 'lockscreen') {
+      log(`Unlocking iPad: ${state} >= ${sensorCutoff}`);
+      await ssh.execCommand(unlockCommand);
+    }
+    if (state < sensorCutoff && status.mode === 'application') {
+      log(`Locking iPad: ${state} < ${sensorCutoff}`);
+      await ssh.execCommand(lockCommand);
+    }
   } catch (err) {
-    console.error(err);
+    error(err);
   }
 }
 
 async function start() {
   if (!ssh.isConnected()) return 'Not connected';
 
-  console.log(`[${new Date().toLocaleString()}]: Start`);
+  log('Start');
 
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(startCommand);
-  console.log(`${response.stdout}${response.stderr}`);
+  log(`${response.stdout}${response.stderr}`);
 
   return response;
 }
@@ -487,11 +494,11 @@ async function start() {
 async function restart() {
   if (!ssh.isConnected()) return 'Not connected';
 
-  console.log(`[${new Date().toLocaleString()}]: Restart`);
+  log('Restart');
 
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(restartCommand);
-  console.log(`${response.stdout}${response.stderr}`);
+  log(`${response.stdout}${response.stderr}`);
 
   return response;
 }
@@ -509,4 +516,12 @@ function mulberry32(a) {
 function setIntervalImmediately(func, interval) {
   func();
   return setInterval(func, interval);
+}
+
+function log(message) {
+  console.log(`[${new Date().toLocaleString()}]: ${message}`);
+}
+
+function error(message) {
+  console.error(`[${new Date().toLocaleString()}]: ${message}`);
 }
