@@ -21,11 +21,20 @@ export const App = () => {
   const [selectedAlbum, setSelectedAlbum] = useSetting('album', client);
   const [ambientMode, setAmbientMode] = useSetting('ambient', client, true);
   const [serverTime, setServerTime, prevServerTime] = useSetting('serverTime', client);
+  const [_, setRotation] = useSetting('rotation', client, 3);
   const [restarting, setRestarting] = useState(false);
 
   useEffect(() => {
     if (prevServerTime !== undefined && serverTime !== prevServerTime) window.location.reload();
   }, [serverTime, prevServerTime]);
+
+  useEffect(() => {
+    const updateRotation = setInterval(() => {
+      const rotation = window.orientation === 90 ? 3 : 4;
+      setRotation(rotation);
+    }, 60 * 1000);
+    return () => clearInterval(updateRotation);
+  }, []);
 
   if (loggedIn)
     return (

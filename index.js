@@ -29,7 +29,7 @@ cacheDirs.forEach((f) => {
 });
 
 let REFRESH_TOKEN = nconf.get('refresh_token');
-let settings = nconf.get('settings') || { iPad: { duration: 60 } };
+let settings = nconf.get('settings') || { iPad: { duration: 60, rotation: 3 } };
 let cropCache = nconf.get('cropCache') || {};
 let lastPing = Date.now() + 60 * 1000;
 
@@ -50,8 +50,8 @@ const unlockCommand = 'activator send libactivator.lockscreen.dismiss';
 const getModeCommand = 'activator current-mode';
 
 const restartScript = '/var/mobile/start.sh';
-const startCommand = `chmod +x ${restartScript} && ${restartScript}`;
-const restartCommand = `chmod +x ${restartScript} && ${restartScript} --restart`;
+const startCommand = (rotation) => `chmod +x ${restartScript} && ${restartScript} ${rotation || 3}`;
+const restartCommand = (rotation) => `chmod +x ${restartScript} && ${restartScript} ${rotation || 3} --restart`;
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL, HA_KEY, HA_SERVER, HA_SENSOR } = process.env;
 
@@ -139,7 +139,7 @@ app.use(express.json());
 app.use(compression());
 
 app.listen(port, '0.0.0.0', () => {
-  log(`Example app listening on port ${port}`);
+  log(`Photo frame server listening on port ${port}`);
 });
 
 app.use('/', express.static('dist'));
@@ -485,7 +485,7 @@ async function start() {
   log('Start');
 
   lastPing = Date.now() + 60 * 1000;
-  const response = await ssh.execCommand(startCommand);
+  const response = await ssh.execCommand(startCommand(settings.iPad.rotation));
   log(response.stdout.split('\n'));
   if (response.stderr) error(response.stderr);
 
@@ -498,7 +498,7 @@ async function restart() {
   log('Restart');
 
   lastPing = Date.now() + 60 * 1000;
-  const response = await ssh.execCommand(restartCommand);
+  const response = await ssh.execCommand(restartCommand(settings.iPad.rotation));
   log(response.stdout.split('\n'));
   if (response.stderr) error(response.stderr);
 

@@ -30,11 +30,11 @@ function stopOther() {
 
 function start() {
   echo "Starting Slideshow"
-  stouch touch 512 700 4
+  stouch touch 512 700 $1
   sleep 15
 
   echo "Enabling Wakelock"
-  stouch touch 300 300 4
+  stouch touch 300 300 $1
 }
 
 # If locked, unlock before starting
@@ -44,7 +44,7 @@ if [[ $currentMode == "lockscreen" ]]; then
 fi
 
 # Only stop safari when "--restart" passed
-if [[ $1 == '--restart' ]]; then
+if [[ $2 == '--restart' ]]; then
   stopSafari
   stopOther
   start
