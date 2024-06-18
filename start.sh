@@ -30,6 +30,12 @@ function stopOther() {
 
 function start() {
   echo "Starting Slideshow"
+  if [[ $1 == '3' ]]; then
+    echo "Right"
+  else
+    echo "Left"
+  fi
+
   stouch touch 512 700 $1
   sleep 15
 
@@ -47,9 +53,9 @@ fi
 if [[ $2 == '--restart' ]]; then
   stopSafari
   stopOther
-  start
+  start $1
 elif [[ $runningApp != "com.apple.webapp" ]]; then
   # Otherwise, just start things if they are not running
   stopOther
-  start
+  start $1
 fi
