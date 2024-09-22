@@ -183,9 +183,12 @@ export function Slideshow(props) {
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 filter: 'blur(2em)',
+                WebkitFilter: 'blur(2em)',
                 zIndex: -1,
                 transform: imageDims[photo.id]?.height > imageDims[photo.id]?.width ? 'scaleX(2)' : 'scaleY(2)',
+                WebkitTransform: imageDims[photo.id]?.height > imageDims[photo.id]?.width ? 'scaleX(2)' : 'scaleY(2)',
                 transformOrigin: 'left',
+                WebkitTransformOrigin: 'left',
               }}
             />
           )}
