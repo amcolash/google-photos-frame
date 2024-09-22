@@ -195,7 +195,6 @@ export function Slideshow(props) {
             style={{
               width: '100%',
               height: '100%',
-              background: crop ? 'black' : undefined,
               backgroundImage: `url(${imageUrl})`,
               backgroundSize: crop ? `${(imageWidth / ipadWidth) * 100}%` : 'contain',
               backgroundPosition: cropCenter && imageDims[photo.id]?.height > ipadHeight ? `center top -${cropCenter.y}px` : 'center',
