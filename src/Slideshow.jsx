@@ -168,25 +168,41 @@ export function Slideshow(props) {
       </HeaderRight>
 
       {(photo.id || placeholder) && (
-        <div
-          style={{
-            width: '100vw',
-            height: '100vh',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            background: 'black',
-            backgroundImage: `url(${imageUrl})`,
-            backgroundSize: crop ? `${(imageWidth / ipadWidth) * 100}%` : 'contain',
-            // backgroundPosition: cropCenter ? `center top ${cropCenter.y}px` : 'center',
-            backgroundPosition: cropCenter && imageDims[photo.id]?.height > ipadHeight ? `center top -${cropCenter.y}px` : 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-          // onError={(e) => {
-          //   logError(e);
-          //   setTimeout(() => setCurrent((current + 1) % props.items.length || 0), 250);
-          // }}
-        />
+        <div style={{ width: '100vw', height: '100vh', position: 'absolute', top: 0, left: 0, overflow: 'hidden' }}>
+          {/* Background blur layer */}
+          {!crop && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'black',
+                backgroundImage: `url(${imageUrl})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                filter: 'blur(2em)',
+                zIndex: -1,
+                transform: imageDims[photo.id]?.height > imageDims[photo.id]?.width ? 'scaleX(2)' : 'scaleY(2)',
+                transformOrigin: 'left',
+              }}
+            />
+          )}
+
+          {/* Top normal layer */}
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              background: crop ? 'black' : undefined,
+              backgroundImage: `url(${imageUrl})`,
+              backgroundSize: crop ? `${(imageWidth / ipadWidth) * 100}%` : 'contain',
+              backgroundPosition: cropCenter && imageDims[photo.id]?.height > ipadHeight ? `center top -${cropCenter.y}px` : 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        </div>
       )}
 
       <div

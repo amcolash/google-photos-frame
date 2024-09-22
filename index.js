@@ -487,7 +487,7 @@ async function start() {
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(startCommand(settings.iPad.rotation));
   log(response.stdout.split('\n'));
-  if (response.stderr) error(response.stderr);
+  if (response.stderr) error(response.stderr.split('\n'));
 
   return response;
 }
@@ -500,7 +500,7 @@ async function restart() {
   lastPing = Date.now() + 60 * 1000;
   const response = await ssh.execCommand(restartCommand(settings.iPad.rotation));
   log(response.stdout.split('\n'));
-  if (response.stderr) error(response.stderr);
+  if (response.stderr) error(response.stderr.split('\n'));
 
   return response;
 }
