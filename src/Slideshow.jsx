@@ -126,6 +126,7 @@ export function Slideshow(props) {
   let end = 0;
   let tall = false;
   let fadeImage = false;
+  let scale = 1.5;
 
   const dims = imageDims[photo.id];
   if (dims) {
@@ -137,6 +138,8 @@ export function Slideshow(props) {
 
     const verticalSides = (screenWidth - scaledDims.width) / screenWidth / 2;
     const horizontalSides = (screenHeight - scaledDims.height) / screenHeight / 2;
+
+    scale = tall ? screenWidth / scaledDims.width : screenHeight / scaledDims.height;
 
     start = (tall ? verticalSides : horizontalSides) * 100 + 1;
     end = start + 4;
@@ -207,11 +210,11 @@ export function Slideshow(props) {
                   backgroundImage: `url(${imageUrl})`,
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'blur(2em)',
-                  WebkitFilter: 'blur(2em)',
+                  filter: 'blur(2.5em)',
+                  WebkitFilter: 'blur(2.5em)',
                   zIndex: -2,
-                  transform: tall ? 'scale(2, 1.2)' : 'scale(1.2, 1.5)',
-                  WebkitTransform: tall ? 'scale(2, 1.2)' : 'scale(1.2, 1.5)',
+                  transform: tall ? `scale(${scale * 1.2}, 1.1)` : `scale(1.1, ${scale * 1.2})`,
+                  WebkitTransform: tall ? `scale(${scale * 1.2}, 1.1)` : `scale(1.1, ${scale * 1.2})`,
                   transformOrigin: tall ? 'left' : 'top',
                   WebkitTransformOrigin: tall ? 'left' : 'top',
                 }}
