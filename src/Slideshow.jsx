@@ -7,6 +7,7 @@ import ArrowRight from './img/arrow-right.svg?react';
 
 import { useSetting } from './hooks/useSetting';
 import { colors, imageWidth, ipadHeight, ipadWidth, isIpad, logError, placeholder, SERVER, slideshowActive } from './util';
+import { useScreenSize } from './hooks/useScreenSize';
 
 let overlayTimer;
 let shuffleTimer;
@@ -23,6 +24,7 @@ export function Slideshow(props) {
   const [current, setCurrent] = useState(0);
   const [imageDims, setImageDims] = useState({});
   const [cropBounds, setCropBounds] = useState({});
+  const { width: screenWidth, height: screenHeight } = useScreenSize();
 
   const [duration, setDuration] = useSetting('duration', props.client, 60);
   const [crop, setCrop] = useSetting('crop', props.client, false);
@@ -120,6 +122,28 @@ export function Slideshow(props) {
     };
   }
 
+  let start = 0;
+  let end = 0;
+  let tall = false;
+  let fadeImage = false;
+
+  const dims = imageDims[photo.id];
+  if (dims) {
+    tall = dims.height > dims.width;
+    const aspect = dims.width / dims.height;
+    const inverseAspect = dims.height / dims.width;
+
+    const scaledDims = { width: tall ? screenHeight * aspect : screenWidth, height: tall ? screenHeight : screenWidth * inverseAspect };
+
+    const verticalSides = (screenWidth - scaledDims.width) / screenWidth / 2;
+    const horizontalSides = (screenHeight - scaledDims.height) / screenHeight / 2;
+
+    start = (tall ? verticalSides : horizontalSides) * 100 + 1;
+    end = start + 4;
+
+    fadeImage = start > 1;
+  }
+
   return (
     <div
       onClick={(e) => {
@@ -171,26 +195,28 @@ export function Slideshow(props) {
         <div style={{ width: '100vw', height: '100vh', position: 'absolute', top: 0, left: 0, overflow: 'hidden' }}>
           {/* Background blur layer */}
           {!crop && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'black',
-                backgroundImage: `url(${imageUrl})`,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                filter: 'blur(2em)',
-                WebkitFilter: 'blur(2em)',
-                zIndex: -1,
-                transform: imageDims[photo.id]?.height > imageDims[photo.id]?.width ? 'scaleX(2)' : 'scaleY(2)',
-                WebkitTransform: imageDims[photo.id]?.height > imageDims[photo.id]?.width ? 'scaleX(2)' : 'scaleY(2)',
-                transformOrigin: 'left',
-                WebkitTransformOrigin: 'left',
-              }}
-            />
+            <>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'black',
+                  backgroundImage: `url(${imageUrl})`,
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'blur(2em)',
+                  WebkitFilter: 'blur(2em)',
+                  zIndex: -2,
+                  transform: tall ? 'scale(2, 1.2)' : 'scale(1.2, 1.5)',
+                  WebkitTransform: tall ? 'scale(2, 1.2)' : 'scale(1.2, 1.5)',
+                  transformOrigin: tall ? 'left' : 'top',
+                  WebkitTransformOrigin: tall ? 'left' : 'top',
+                }}
+              />
+            </>
           )}
 
           {/* Top normal layer */}
@@ -202,13 +228,45 @@ export function Slideshow(props) {
               backgroundSize: crop ? `${(imageWidth / ipadWidth) * 100}%` : 'contain',
               backgroundPosition: cropCenter && imageDims[photo.id]?.height > ipadHeight ? `center top -${cropCenter.y}px` : 'center',
               backgroundRepeat: 'no-repeat',
+              maskImage: fadeImage
+                ? `linear-gradient(${tall ? '0' : '90'}deg, rgba(0,0,0,0) ${start}%, rgba(255,255,255,1) ${end}%, rgba(255,255,255,1) ${
+                    100 - end
+                  }%, rgba(0,0,0,0) ${100 - start}%)`
+                : undefined,
+              WebkitMaskImage: fadeImage
+                ? `-webkit-linear-gradient(${
+                    tall ? '0' : '90'
+                  }deg, rgba(0,0,0,0) ${start}%, rgba(255,255,255,1) ${end}%, rgba(255,255,255,1) ${100 - end}%, rgba(0,0,0,0) ${
+                    100 - start
+                  }%)`
+                : undefined,
             }}
           />
+
+          {/* Debug mask */}
+          {/* {fadeImage && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: `linear-gradient(${
+                  tall ? '90' : '0'
+                }deg, rgba(0,0,0,0) ${start}%, rgba(255,255,255,1) ${end}%, rgba(255,255,255,1) ${100 - end}%, rgba(0,0,0,0) ${
+                  100 - start
+                }%)`,
+              }}
+            />
+          )} */}
         </div>
       )}
 
       <div
         style={{
+          display: 'flex',
+          alignItems: 'center',
           position: 'absolute',
           bottom: '1em',
           right: '1em',
@@ -216,6 +274,10 @@ export function Slideshow(props) {
           textShadow: '0 0 0.5em black',
           opacity: overlay ? 1 : 0,
           transition: 'opacity 0.5s',
+          background: 'rgba(0,0,0,0.5)',
+          padding: '0.3em',
+          paddingRight: '1.3em',
+          borderRadius: '0.5em',
         }}
       >
         <button
