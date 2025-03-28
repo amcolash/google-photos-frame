@@ -2,8 +2,8 @@ version: '3'
 
 services:
   photo-frame:
-    image: amcolash/photo-frame
-    container_name: photo-frame
+    image: amcolash/google-photo-frame
+    container_name: google-photo-frame
     build: ./
     network_mode: 'host'
     volumes:
